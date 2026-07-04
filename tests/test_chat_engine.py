@@ -166,10 +166,8 @@ async def test_chat_loop_basic(chat_mock):
 
         # We need to mock _handle_slash and _execute_instruction
         with patch.object(chat_mock, "_handle_slash") as mock_slash:
-            mock_slash.side_effect = (
-                lambda cmd: setattr(chat_mock, "_running", False)
-                if cmd.startswith("/exit")
-                else None
+            mock_slash.side_effect = lambda cmd: (
+                setattr(chat_mock, "_running", False) if cmd.startswith("/exit") else None
             )
             await chat_mock.start_chat()
             # Loop should terminate because /exit sets _running = False

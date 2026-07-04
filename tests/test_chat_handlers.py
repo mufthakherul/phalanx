@@ -261,8 +261,8 @@ def test_show_key_status(chat, mock_console):
         mock_registry.list_providers.return_value = ["openai", "anthropic"]
         profile_openai = MagicMock(api_key_env="OPENAI_API_KEY")
         profile_anthropic = MagicMock(api_key_env="ANTHROPIC_API_KEY")
-        mock_registry.get_profile.side_effect = (
-            lambda p: profile_openai if p == "openai" else profile_anthropic
+        mock_registry.get_profile.side_effect = lambda p: (
+            profile_openai if p == "openai" else profile_anthropic
         )
 
         mock_store = MagicMock()
