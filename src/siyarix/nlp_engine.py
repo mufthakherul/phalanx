@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 import math
 import difflib
+import functools
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any
@@ -25,6 +26,10 @@ class ParsedIntent:
     confidence: float = 0.0
     tokens: list[str] = field(default_factory=list)
     raw_text: str = ""
+    all_entities: dict[str, list[str]] = field(default_factory=dict)
+    negated: bool = False
+    conjunctive_goal: bool = False
+    normalized_confidence: float = 0.0
 
 
 class NaturalLanguageParser:
@@ -123,8 +128,94 @@ class NaturalLanguageParser:
         "gcp_bucket": r"\b(?:[a-z0-9\-_]{3,63}\.storage\.googleapis\.com)\b",
     }
 
-    # Suffixes for lightweight stemming
-    SUFFIXES = ["ing", "ed", "s", "es", "ly", "tion", "ity", "ment", "ness", "able", "ible"]
+    # Suffixes for lightweight stemming - ordered longest to shortest to prevent over-stemming
+    SUFFIXES = ["ation", "tion", "ness", "ment", "able", "ible", "ity", "ing", "ly", "ed", "es", "s"]
+
+    # PHRASE_SYNONYMS applied before tokenization
+    PHRASE_SYNONYMS: dict[str, str] = {
+        "pass the hash": "pth",
+        "pass the ticket": "ptt",
+        "pass-the-hash": "pth",
+        "pass-the-ticket": "ptt",
+        "living off the land": "lolbas",
+        "living-off-the-land": "lolbas",
+        "golden ticket": "golden_ticket",
+        "silver ticket": "silver_ticket",
+        "diamond ticket": "diamond_ticket",
+        "lateral movement": "pivoting",
+        "privilege escalation": "privesc",
+        "command and control": "c2",
+        "out of band": "oob",
+        "out-of-band": "oob",
+        "man in the middle": "mitm",
+        "man-in-the-middle": "mitm",
+        "denial of service": "dos",
+        "sql injection": "sqli",
+        "cross site scripting": "xss",
+        "cross-site scripting": "xss",
+        "remote code execution": "rce",
+        "local file inclusion": "lfi",
+        "remote file inclusion": "rfi",
+        "server side request forgery": "ssrf",
+        "server-side request forgery": "ssrf",
+        "insecure direct object reference": "idor",
+        "security misconfiguration": "misconfig",
+        "broken access control": "bac",
+        "open redirect": "redirect",
+        "evil twin": "evil_twin",
+        "rogue ap": "evil_twin",
+        "rogue access point": "evil_twin",
+        "spear phishing": "spearphish",
+        "supply chain": "supplychain",
+        "dependency confusion": "depconfusion",
+        "token impersonation": "token_impersonation",
+        "process injection": "injection",
+        "code injection": "injection",
+        "heap spray": "heapspray",
+        "rop chain": "ropchain",
+        "format string": "formatstring",
+        "use after free": "uaf",
+        "buffer overflow": "bof",
+        "stack overflow": "bof",
+        "integer overflow": "intoverflow",
+        "type confusion": "typeconfusion",
+        "race condition": "racecondition",
+        "time of check": "toctou",
+        "atomic red team": "art",
+        "attack simulation": "purpleteam",
+        "threat hunting": "threathunting",
+        "incident response": "ir",
+        "azure active directory": "azuread",
+        "azure ad": "azuread",
+        "active directory": "activedirectory",
+        "domain controller": "dc",
+        "service principal": "sp",
+        "managed identity": "managedidentity",
+        "kubernetes attack": "k8s_attack",
+        "container escape": "containerescape",
+        "firmware analysis": "firmware",
+        "iot device": "iot",
+        "ics network": "ics",
+        "scada system": "scada",
+        "ssl pinning": "sslpinning",
+        "certificate pinning": "sslpinning",
+        "root detection": "rootdetection",
+        "jailbreak detection": "jailbreakdetection",
+        "amsi bypass": "amsibypass",
+        "etw bypass": "etwbypass",
+        "av bypass": "avbypass",
+        "edr bypass": "edrbypass",
+        "defense evasion": "evasion",
+        "dns exfiltration": "dnsexfil",
+        "icmp tunnel": "icmptunnel",
+        "covert channel": "covertchannel",
+        "bug bounty": "bugbounty",
+        "responsible disclosure": "bugbounty",
+        "capture the flag": "ctf",
+        "padding oracle": "paddingoracle",
+        "hash cracking": "hashcrack",
+        "rainbow table": "rainbowtable",
+    }
 
     # Extended Ontology mapping synonyms to canonical forms (including MITRE tactics)
     DEFAULT_SYNONYMS = {
@@ -444,6 +535,222 @@ class NaturalLanguageParser:
         "bbrf": "recon",
         "projectdiscovery": "recon",
         "pd": "recon",
+        # Post-Exploitation / C2
+        "shellcode": "exploit",
+        "payload": "exploit",
+        "stager": "exploit",
+        "dropper": "exploit",
+        "loader": "exploit",
+        "implant": "c2",
+        "agent": "c2",
+        "listener": "c2",
+        "handler": "c2",
+        "meterpreter": "exploit",
+        # Privilege Escalation
+        "privesc": "escalation",
+        "winpeas": "winpeas",
+        "linpeas": "linpeas",
+        "powerup": "winpeas",
+        "seatbelt": "winpeas",
+        "sharpup": "winpeas",
+        "juicypotato": "winpeas",
+        "roguewinrm": "winpeas",
+        "printspoofer": "winpeas",
+        "godpotato": "winpeas",
+        "seimpersonateprivilege": "winpeas",
+        "sweetpotato": "winpeas",
+        "tokenvator": "winpeas",
+        "incognito": "winpeas",
+        "capabilities": "linpeas",
+        "linenum": "linpeas",
+        "pspy": "linpeas",
+        "gtfobins": "linpeas",
+        "lolbas": "lolbas",
+        "lolbin": "lolbas",
+        # Lateral Movement
+        "chisel": "pivoting",
+        "ligolo": "pivoting",
+        "socat": "pivoting",
+        "proxychains": "pivoting",
+        "socks5": "pivoting",
+        "plink": "pivoting",
+        "stunnel": "pivoting",
+        # Persistence
+        "backdoor": "persistence",
+        "rootkit": "persistence",
+        "webshell": "persistence",
+        "crontab": "persistence",
+        "autoruns": "persistence",
+        "regrun": "persistence",
+        # Defense Evasion
+        "amsi": "evasion",
+        "etw": "evasion",
+        "obfuscate": "evasion",
+        "veil": "evasion",
+        "shellter": "evasion",
+        "donut": "evasion",
+        "srdi": "evasion",
+        # Exfiltration
+        "exfil": "exfiltration",
+        "dnsexfil": "exfiltration",
+        "icmptunnel": "exfiltration",
+        "covertchannel": "exfiltration",
+        "iodine": "exfiltration",
+        # Social Engineering
+        "spearphish": "phishing",
+        "vish": "phishing",
+        "smish": "phishing",
+        "pretexting": "phishing",
+        "gophish": "phishing",
+        "evilginx": "phishing",
+        "modlishka": "phishing",
+        "setools": "phishing",
+        # IoT / Embedded
+        "firmware": "iot",
+        "jtag": "iot",
+        "uart": "iot",
+        "bootloader": "iot",
+        "flashrom": "iot",
+        "openocd": "iot",
+        "avrdude": "iot",
+        "i2c": "iot",
+        "spi": "iot",
+        "firmwalker": "iot",
+        "unblob": "iot",
+        # OT / ICS / SCADA
+        "modbus": "ics",
+        "dnp3": "ics",
+        "profibus": "ics",
+        "profinet": "ics",
+        "plc": "ics",
+        "hmi": "ics",
+        "mbtget": "ics",
+        "plcscan": "ics",
+        # Mobile
+        "apk": "android",
+        "adb": "android",
+        "frida": "mobile",
+        "objection": "mobile",
+        "mobsf": "mobile",
+        "apkleaks": "android",
+        "jadx": "android",
+        "dex2jar": "android",
+        "apkid": "android",
+        "ipa": "ios",
+        "idb": "ios",
+        "clutch": "ios",
+        "cycript": "ios",
+        "sslpinning": "mobile",
+        "jailbreak": "ios",
+        "rootdetection": "android",
+        # Cloud Attack
+        "azuread": "cloud",
+        "aadinternals": "cloud",
+        "powerzure": "cloud",
+        "roadtools": "cloud",
+        "stormspotter": "cloud",
+        "azurehound": "cloud",
+        "microburst": "cloud",
+        "gcpbucketbrute": "cloud",
+        "imds": "cloud",
+        "metadata_service": "cloud",
+        # Kubernetes / Container
+        "containerescape": "kubernetes",
+        "cdk": "kubernetes",
+        "kubesec": "kubernetes",
+        "kube-hunter": "kubernetes",
+        "kube-bench": "kubernetes",
+        "etcd": "kubernetes",
+        "rbac": "kubernetes",
+        # Cryptography / CTF
+        "hashcrack": "crypto",
+        "rainbowtable": "crypto",
+        "rsactftool": "crypto",
+        "paddingoracle": "crypto",
+        "xorcrack": "crypto",
+        "hashid": "crypto",
+        "nth": "crypto",
+        # CTF Pwn
+        "pwn": "pwn",
+        "ropchain": "pwn",
+        "heapspray": "pwn",
+        "bof": "pwn",
+        "pwndbg": "pwn",
+        "ropgadget": "pwn",
+        "pwntools": "pwn",
+        "checksec": "pwn",
+        "gef": "pwn",
+        "peda": "pwn",
+        "formatstring": "pwn",
+        "uaf": "pwn",
+        # CTF Steganography / Forensics
+        "steghide": "stego",
+        "stegcracker": "stego",
+        "zsteg": "stego",
+        "stegsolve": "stego",
+        "outguess": "stego",
+        "steganography": "stego",
+        # Purple Team / Threat Intel
+        "art": "purpleteam",
+        "caldera": "purpleteam",
+        "vectr": "purpleteam",
+        "mitre": "purpleteam",
+        "ttp": "purpleteam",
+        "ioc": "threathunting",
+        "edr": "threathunting",
+        "xdr": "threathunting",
+        "soar": "threathunting",
+        "soc": "threathunting",
+        "playbook": "threathunting",
+        "threathunting": "threathunting",
+        # Bug Bounty
+        "bugbounty": "bugbounty",
+        "vdp": "bugbounty",
+        "hackerone": "bugbounty",
+        "bugcrowd": "bugbounty",
+        # Wireless extensions
+        "pmkid": "wifi",
+        "evil_twin": "wifi",
+        "hcxtools": "wifi",
+        "wifite": "wifi",
+        "kismet": "wifi",
+        "bettercap": "wifi",
+        "hostapd": "wifi",
+        "ble": "bluetooth",
+        "zigbee": "iot",
+        "zwave": "iot",
+        "nfc": "rfid",
+        "rfid": "rfid",
+        # Cryptography
+        "padbuster": "crypto",
+        "john": "hashcrack",
+        "cewl": "wordlist",
+        "crunch": "wordlist",
+        "dalfox": "xss",
+        "kxss": "xss",
+        "swaks": "phishing",
+        "dnscat": "exfiltration",
+        "dnscat2": "exfiltration",
+        "ptunnel": "exfiltration",
+        "weevely": "webshell",
+        "rubeus": "activedirectory",
+        "mimikatz": "activedirectory",
+        "pypykatz": "activedirectory",
+        "nanodump": "activedirectory",
+        "lsassy": "activedirectory",
+        "msfvenom": "exploit",
+        "msfconsole": "exploit",
+        "havoc": "exploit",
+        "villain": "exploit",
+        "scythe": "exploit",
+        "nighthawk": "exploit",
+        "deimos": "exploit",
+        "xfreerdp": "rdp",
+        "rdesktop": "rdp",
+        "pip-audit": "supplychain",
+        "confused": "supplychain",
+        "supplychain": "supplychain",
+        "depconfusion": "supplychain",
     }
 
     def __init__(self, custom_synonyms: dict[str, str] | None = None) -> None:
@@ -457,6 +764,8 @@ class NaturalLanguageParser:
         self.synonyms = self.DEFAULT_SYNONYMS.copy()
         if custom_synonyms:
             self.synonyms.update(custom_synonyms)
+
+        self._tokenize_cache: dict[str, list[str]] = {}
 
     def _recalculate_idf(self) -> None:
         """Calculate document frequencies for IDF weighting."""
@@ -527,45 +836,96 @@ class NaturalLanguageParser:
 
     def tokenize(self, text: str) -> list[str]:
         """Convert raw text into normalized semantic tokens including N-Grams."""
-        text = text.lower()
-        # Remove punctuation except hyphens
-        text = re.sub(r"[^\w\s-]", " ", text)
-        words = text.split()
+        cached = self._tokenize_cache.get(text)
+        if cached is not None:
+            return cached
+        result = self._do_tokenize(text)
+        if len(self._tokenize_cache) < 512:
+            self._tokenize_cache[text] = result
+        return result
 
-        tokens = []
-        clean_words = []
+    def _do_tokenize(self, text: str) -> list[str]:
+        """Internal tokenization logic (uncached)."""
+        text_lower = text.lower()
+        # Apply phrase synonyms before single-word processing
+        for phrase, canonical in self.PHRASE_SYNONYMS.items():
+            text_lower = text_lower.replace(phrase, canonical)
+        # Remove punctuation except hyphens
+        text_normalized = re.sub(r"[^\w\s-]", " ", text_lower)
+        words = text_normalized.split()
+        tokens: list[str] = []
+        clean_words: list[str] = []
         for w in words:
             if w and w not in self.STOPWORDS and len(w) > 1:
-                # Apply stemming first
                 stemmed = self.stem_word(w)
-                # Apply synonym mapping
                 mapped = self.synonyms.get(stemmed, stemmed)
                 clean_words.append(mapped)
                 tokens.append(mapped)
-
         # Generate Bigrams
         for i in range(len(clean_words) - 1):
             tokens.append(f"{clean_words[i]}_{clean_words[i + 1]}")
-
+        # Generate Trigrams
         for i in range(len(clean_words) - 2):
             tokens.append(f"{clean_words[i]}_{clean_words[i + 1]}_{clean_words[i + 2]}")
-
         return tokens
 
     def extract_entities(self, text: str) -> tuple[str, str]:
-        """Extract the primary target (URL, IP, Domain, Email, MAC)."""
+        """Extract the primary target entity, using a strict priority ordering.
+
+        Collects ALL matched entity types and returns the single highest-priority
+        one. Priority (high -> low):
+        url > cidr > ipv4 > ipv6 > mac > cve > sha256 > sha1 > md5 > ntlm > asn
+        > aws_s3 > azure_blob > gcp_bucket > github_repo > windows_path
+        > linux_path > email > domain
+        """
+        found = self.extract_all_entities(text)
+        # Priority ordering
+        for etype in (
+            "url",
+            "cidr",
+            "ipv4",
+            "ipv6",
+            "mac",
+            "cve",
+            "sha256",
+            "sha1",
+            "md5",
+            "ntlm",
+            "asn",
+            "aws_s3",
+            "azure_blob",
+            "gcp_bucket",
+            "github_repo",
+            "windows_path",
+            "linux_path",
+            "email",
+            "domain",
+        ):
+            if etype in found:
+                return found[etype][0], etype
+        return "", ""
+
+    def extract_all_entities(self, text: str) -> dict[str, list[str]]:
+        """Extract ALL entity types found in the text, returned as a dict."""
+        found: dict[str, list[str]] = {}
         for entity_type, pattern in self.PATTERNS.items():
             matches = re.findall(pattern, text)
             if matches:
-                # For domains, filter out false positives like "e.g." or "v.1"
                 if entity_type == "domain":
-                    valid_matches = [m for m in matches if len(m) > 4 and not m.startswith("e.g")]
-                    if valid_matches:
-                        return valid_matches[0], entity_type
+                    valid = [
+                        m
+                        for m in matches
+                        if len(m) > 4
+                        and not m.startswith("e.g")
+                        and not re.match(r"^[v\d]+[\d.]+$", m)
+                        and m.count(".") >= 1
+                        and not re.match(r"^\d+\.\d+\.\d+\.\d+$", m)
+                    ]
+                    if valid:
+                        found[entity_type] = valid
                 else:
-                    return matches[0], entity_type
-
-        return "", ""
+                    found[entity_type] = list(matches)
+        return found
 
     def extract_parameters(self, text: str) -> dict[str, str]:
         """Extract modifier arguments with Negation Context Handling."""
@@ -573,10 +933,11 @@ class NaturalLanguageParser:
         text_lower = text.lower()
 
         is_negated = any(
-            neg in text_lower for neg in ["not ", "no ", "without ", "skip ", "exclude "]
+            neg in text_lower
+            for neg in ["not ", "no ", "without ", "skip ", "exclude ", "don't ", "dont ", "avoid "]
         )
 
-        port_match = re.search(r"\bport(?:s)?\s*([0-9,\-]+)\b", text_lower)
+        port_match = re.search(r"(?:\bports?|-p)\s*([0-9,\-]+)\b", text_lower)
         if port_match:
             params["ports"] = port_match.group(1)
         elif "all ports" in text_lower or "full ports" in text_lower:
@@ -665,6 +1026,87 @@ class NaturalLanguageParser:
         if module_match:
             params["module"] = module_match.group(1)
 
+        # Rate Limiting / Rate parameter extraction
+        rate_match = re.search(r"\b(?:rate|--rate)\s*(\d+)\b", text_lower)
+        if rate_match:
+            params["rate"] = rate_match.group(1)
+
+        # Output file
+        output_match = re.search(
+            r"\b(?:save\s+to|output\s+to|write\s+to|out(?:put)?\s+file)\s+([a-zA-Z0-9_.\-/\\]+)\b",
+            text_lower,
+        )
+        if output_match:
+            params["output"] = output_match.group(1)
+
+        # Recursion depth
+        depth_match = re.search(r"\b(?:depth|level|recursion)\s*(\d+)\b", text_lower)
+        if depth_match:
+            params["depth"] = depth_match.group(1)
+
+        # Proxy
+        proxy_match = re.search(
+            r"\b(?:via|through|using)?\s*proxy\s+([a-zA-Z0-9:./\-]+)\b", text_lower
+        )
+        if proxy_match:
+            params["proxy"] = proxy_match.group(1)
+
+        # Auth token / API key
+        token_match = re.search(
+            r"\b(?:with\s+token|api[_\s]?key|bearer|authorization\s+token)\s+([a-zA-Z0-9_.\-]+)\b",
+            text_lower,
+        )
+        if token_match:
+            params["token"] = token_match.group(1)
+
+        # Target list from file
+        targetlist_match = re.search(
+            r"\b(?:from\s+file|targets?\s+(?:from|in)|input\s+file|target\s+list)\s+([a-zA-Z0-9_.\-/\\]+)\b",
+            text_lower,
+        )
+        if targetlist_match:
+            params["target_list"] = targetlist_match.group(1)
+
+        # Exclude
+        exclude_match = re.search(
+            r"\b(?:exclude|ignore|blacklist)\s+([a-zA-Z0-9_.\-/,]+)\b", text_lower
+        )
+        if exclude_match:
+            params["exclude"] = exclude_match.group(1)
+
+        # Time range
+        time_range_match = re.search(
+            r"\blast\s+(\d+)\s*(day|hour|week|month)s?\b", text_lower
+        )
+        if time_range_match:
+            n, unit = time_range_match.group(1), time_range_match.group(2)
+            unit_map = {"hour": "h", "day": "d", "week": "w", "month": "m"}
+            params["time_range"] = f"{n}{unit_map.get(unit, unit[0])}"
+
+        # Threads / Concurrency
+        threads_match = re.search(r"\b(?:threads|--threads|-t)\s*(\d+)\b", text_lower)
+        if threads_match:
+            params["threads"] = threads_match.group(1)
+
+        # User-Agent string
+        ua_match = re.search(r"\b(?:user-agent|ua)\s+['\"]([^'\"]+)['\"]", text_lower)
+        if not ua_match:
+            ua_match = re.search(r"\b(?:user-agent|ua)\s+([a-zA-Z0-9_.\-\/:()]+)\b", text_lower)
+        if ua_match:
+            params["user_agent"] = ua_match.group(1)
+
+        # Cookie header
+        cookie_match = re.search(r"\b(?:cookie|cookies)\s+['\"]([^'\"]+)['\"]", text_lower)
+        if not cookie_match:
+            cookie_match = re.search(r"\b(?:cookie|cookies)\s+([a-zA-Z0-9_.\-=\/;]+)\b", text_lower)
+        if cookie_match:
+            params["cookie"] = cookie_match.group(1)
+
+        # Verbosity level
+        verbosity_match = re.search(r"\b(?:verbose|verbosity|level)\s+(low|medium|high|debug|\d)\b", text_lower)
+        if verbosity_match:
+            params["verbosity"] = verbosity_match.group(1)
+
         return params
 
     def get_idf(self, token: str) -> float:
@@ -749,9 +1191,12 @@ class NaturalLanguageParser:
             for t in doc_tokens:
                 doc_tf[t] += 1
 
-            for token in tokens:
+            for token_idx, token in enumerate(tokens):
                 idf = self.get_idf(token)
                 term_freq = 0
+
+                # Positional boost: first 3 query tokens carry more intent signal
+                positional_multiplier = 1.25 if token_idx < 3 else 1.0
 
                 if "_" in token:
                     # N-grams
@@ -767,7 +1212,7 @@ class NaturalLanguageParser:
                     # Okapi BM25 scoring formula
                     numerator = term_freq * (k1 + 1)
                     denominator = term_freq + k1 * (1 - b + b * (doc_len / max(1.0, avgdl)))
-                    score += idf * (numerator / denominator)
+                    score += idf * (numerator / denominator) * positional_multiplier
 
             if score > highest_score:
                 highest_score = score
@@ -775,21 +1220,42 @@ class NaturalLanguageParser:
 
         return best_match, highest_score
 
+    def normalize_target(self, target: str, target_type: str) -> str:
+        """Sanitize and normalize extracted target entities."""
+        if not target:
+            return ""
+        target = target.strip()
+        if target_type == "url":
+            target = target.rstrip("/")
+        elif target_type == "domain":
+            target = target.lower().strip(".")
+        elif target_type in ("ipv4", "ipv6"):
+            target = target.strip("[]")
+        return target
+
     def parse(self, text: str) -> ParsedIntent:
         """Parse natural language into a structured intent representation."""
         intent = ParsedIntent(raw_text=text)
 
         # 1. Target Extraction
-        intent.target, intent.target_type = self.extract_entities(text)
+        raw_target, intent.target_type = self.extract_entities(text)
+        intent.target = self.normalize_target(raw_target, intent.target_type)
+        intent.all_entities = self.extract_all_entities(text)
 
         # Strip the target from text to prevent it from confusing intent matching
-        clean_text = text.replace(intent.target, "") if intent.target else text
+        clean_text = text.replace(raw_target, "") if raw_target else text
 
         # 2. Tokenization
         intent.tokens = self.tokenize(clean_text)
 
         # 3. Parameter Extraction
         intent.parameters = self.extract_parameters(clean_text)
+
+        # Detect negation
+        intent.negated = any(
+            neg in text.lower()
+            for neg in ["not ", "no ", "without ", "skip ", "don't ", "dont ", "avoid "]
+        )
 
         # 4. Intent Scoring
         if intent.tokens:
@@ -804,6 +1270,11 @@ class NaturalLanguageParser:
                 intent.tool_name = tool_match
                 intent.confidence = tool_score
 
+        # Normalized confidence: sigmoid-like mapping to 0-1 scale
+        if intent.confidence > 0:
+            k = 5.0
+            intent.normalized_confidence = intent.confidence / (intent.confidence + k)
+
         # Minimum confidence threshold — garbled/unrecognised input drops to None
         if intent.confidence < 0.15:
             intent.tool_name = None
@@ -814,13 +1285,40 @@ class NaturalLanguageParser:
 
     def parse_multi(self, text: str) -> list[ParsedIntent]:
         """Parse natural language into multiple structured intents if conjunctions exist."""
-        # Split text by unambiguous multi-step conjunctions
-        split_pattern = r"\b(?:and then|followed by|&&|,\s*then|then)\b"
+        # Split text by unambiguous multi-step conjunctions and separators
+        split_pattern = (
+            r"\b(?:"
+            r"and\s+then"
+            r"|followed\s+by"
+            r"|&&"
+            r"|,\s*then"
+            r"|then"
+            r"|after\s+that"
+            r"|next"
+            r"|subsequently"
+            r"|finally"
+            r"|lastly"
+            r"|also\s+run"
+            r"|also\s+do"
+            r")\b"
+            r"|;\s*"
+        )
         parts = re.split(split_pattern, text, flags=re.IGNORECASE)
 
         intents = []
-        for part in parts:
-            part = part.strip()
+        first_target = ""
+        first_target_type = ""
+        for i, part in enumerate(parts):
+            part = part.strip() if part else ""
             if len(part) >= 2:
-                intents.append(self.parse(part))
+                parsed = self.parse(part)
+                # Propagate target from first intent to subsequent targetless intents
+                if i == 0:
+                    first_target = parsed.target
+                    first_target_type = parsed.target_type
+                elif not parsed.target and first_target:
+                    parsed.target = first_target
+                    parsed.target_type = first_target_type
+                parsed.conjunctive_goal = len(parts) > 1
+                intents.append(parsed)
         return intents

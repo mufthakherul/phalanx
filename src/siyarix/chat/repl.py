@@ -31,6 +31,7 @@ from rich.columns import Columns
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 from .session import ChatSession
 from .ui import SmartAutocomplete, SplitPane, render_welcome_banner
@@ -491,6 +492,8 @@ class SiyarixChat(CommandHandlersMixin, LLMEngineMixin):
                     self._pt_session = PromptSession(
                         multiline=True,
                         vi_mode=False,
+                        complete_while_typing=True,
+                        auto_suggest=AutoSuggestFromHistory(),
                     )
 
                 top_bar = make_prompt_top(
@@ -505,6 +508,8 @@ class SiyarixChat(CommandHandlersMixin, LLMEngineMixin):
                         pt_prompt,
                         key_bindings=esc_bindings,
                         completer=SmartAutocomplete(self._session),
+                        complete_while_typing=True,
+                        auto_suggest=AutoSuggestFromHistory(),
                     )
                     if _result is None:
                         raise KeyboardInterrupt

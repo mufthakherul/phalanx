@@ -226,6 +226,134 @@ class OutputEngine:
         else:
             self._raw_print(f"ℹ {message}")
 
+    def print_mitre_mapping(self, mappings: list[dict]) -> None:
+        """Render a table mapping tool steps to MITRE ATT&CK techniques."""
+        if not mappings:
+            self.print_warning("No MITRE ATT&CK mappings found.")
+            return
+
+        if RICH_AVAILABLE and self.format == OutputFormat.TABLE and self.console is not None:
+            primary_style = self.theme.get("primary", "cyan")
+            info_style = self.theme.get("info", "blue")
+            warning_style = self.theme.get("warning", self.theme.get("medium", "yellow"))
+            success_style = self.theme.get("success", "green")
+
+            table = Table(
+                title="MITRE ATT&CK Framework Mapping",
+                show_header=True,
+                header_style=f"bold {primary_style}",
+            )
+            table.add_column("Technique ID", style=info_style)
+            table.add_column("Technique Name", style=primary_style)
+            table.add_column("Tactic", style=warning_style)
+            table.add_column("Associated Tool", style=success_style)
+
+            for m in mappings:
+                table.add_row(
+                    m.get("id", "N/A"),
+                    m.get("name", "N/A"),
+                    m.get("tactic", "N/A"),
+                    m.get("tool", "N/A"),
+                )
+            self.console.print(table)
+        else:
+            self._raw_print("\n=== MITRE ATT&CK Mapping ===")
+            for m in mappings:
+                self._raw_print(
+                    f"[{m.get('id', 'N/A')}] {m.get('name', 'N/A')} - "
+                    f"Tactic: {m.get('tactic', 'N/A')} - Tool: {m.get('tool', 'N/A')}"
+                )
+
+    def print_finding_panel(self, finding: dict) -> None:
+        """Render a premium styled vulnerability finding panel."""
+        title = finding.get("title", "Vulnerability Finding")
+        cve = finding.get("cve", "N/A")
+        cvss = finding.get("cvss", "N/A")
+        desc = finding.get("description", "")
+        poc = finding.get("poc", "")
+        rem = finding.get("remediation", "")
+
+        severity = finding.get("severity", "Info").lower()
+        sev_color = self.theme.get(severity, "white")
+
+        if RICH_AVAILABLE and self.console is not None:
+            from rich.panel import Panel
+            from rich.text import Text
+
+            content = Text()
+            content.append("CVE: ", style="bold")
+            content.append(f"{cve}\n")
+            content.append("CVSS: ", style="bold")
+            content.append(f"{cvss}\n\n", style="bold red" if "critical" in severity or "high" in severity else "")
+            
+            content.append("Description:\n", style="bold")
+            content.append(f"{desc}\n\n")
+            
+            if poc:
+                content.append("Proof of Concept:\n", style="bold")
+                content.append(f"{poc}\n\n", style="dim")
+                
+            if rem:
+                content.append("Remediation:\n", style="bold")
+                content.append(f"{rem}\n", style="green")
+
+            panel = Panel(
+                content,
+                title=f"[{sev_color} bold]{title} ({finding.get('severity', 'Info')})[/{sev_color} bold]",
+                border_style=sev_color,
+                padding=(1, 2),
+            )
+            self.console.print(panel)
+        else:
+            self._raw_print(f"\n[{finding.get('severity', 'Info').upper()}] {title}")
+            self._raw_print(f"CVE: {cve} | CVSS: {cvss}")
+            self._raw_print(f"Description: {desc}")
+            if poc:
+                self._raw_print(f"PoC: {poc}")
+            if rem:
+                self._raw_print(f"Remediation: {rem}")
+            self._raw_print("=" * 40)
+
+    def print_timeline(self, events: list[dict]) -> None:
+        """Render a chronological forensic investigation timeline."""
+        if not events:
+            self.print_warning("No timeline events to display.")
+            return
+
+        if RICH_AVAILABLE and self.format == OutputFormat.TABLE and self.console is not None:
+            primary_style = self.theme.get("primary", "cyan")
+            info_style = self.theme.get("info", "blue")
+            warning_style = self.theme.get("warning", self.theme.get("medium", "yellow"))
+
+            table = Table(
+                title="Forensic Timeline & Event Analysis",
+                show_header=True,
+                header_style=f"bold {primary_style}",
+            )
+            table.add_column("Timestamp", style=info_style)
+            table.add_column("Source", style=primary_style)
+            table.add_column("Event Type", style=warning_style)
+            table.add_column("Details", style="white")
+
+            # Sort events by timestamp if possible
+            sorted_events = sorted(events, key=lambda e: e.get("timestamp", ""))
+            for e in sorted_events:
+                table.add_row(
+                    e.get("timestamp", "N/A"),
+                    e.get("source", "N/A"),
+                    e.get("event_type", "N/A"),
+                    e.get("details", "N/A"),
+                )
+            self.console.print(table)
+        else:
+            self._raw_print("\n=== Forensic Timeline ===")
+            sorted_events = sorted(events, key=lambda e: e.get("timestamp", ""))
+            for e in sorted_events:
+                self._raw_print(
+                    f"[{e.get('timestamp', 'N/A')}] ({e.get('source', 'N/A')}) "
+                    f"{e.get('event_type', 'N/A')}: {e.get('details', 'N/A')}"
+                )
+
     def print_progress(
         self,
         items: list,

@@ -14,6 +14,13 @@ def register_profile(manager: ProviderManager) -> None:
             display_name="xAI (Grok)",
             models=[
                 ModelInfo(
+                    "grok-4.5",
+                    supports_vision=True,
+                    supports_structured_output=True,
+                    context_window=2000000,
+                    cost_tier=CostTier.HIGH,
+                ),
+                ModelInfo(
                     "grok-4.3",
                     supports_vision=True,
                     supports_structured_output=True,

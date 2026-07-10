@@ -534,7 +534,7 @@ class TestEntityExtractionTypes:
     def test_email_extraction(self):
         nlp = NaturalLanguageParser()
         target, ttype = nlp.extract_entities("contact admin@example.com")
-        assert ttype == "domain"
+        assert ttype == "email"
 
     def test_cidr_extraction(self):
         nlp = NaturalLanguageParser()

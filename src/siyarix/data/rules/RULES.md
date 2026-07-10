@@ -85,3 +85,21 @@ This document contains all operational rules for Siyarix. These rules govern how
 - Steer off-topic requests back to security gracefully
 
 ---
+
+## 4. OPSEC, Stealth, and Safety Standards
+
+### 4.1 Stealth Scanning Operations
+- Minimize target network traffic to avoid triggering intrusion prevention systems (IPS) unless noisy mode is requested.
+- Ensure appropriate packet rate limits (e.g. `--rate-limit 20` for nuclei or `--min-rate 10` for nmap) are configured.
+- Leverage randomized user agents (`-H "User-Agent: ..."` / proxy configurations) to match evasion levels.
+
+### 4.2 Credentials Evasion and Protection
+- Never output hardcoded passwords, cleartext SSH keys, or API tokens directly to the terminal stdout/logs.
+- Use variable substitution (e.g. `$API_KEY` or `Env:API_KEY`) and refer to `.env` file configurations.
+- Ensure that command steps do not leak active authorization bearer headers in command logs.
+
+### 4.3 Digital Forensics Integrity
+- Never modify access, modification, or creation timestamps (MAC times) of investigated system files.
+- Operate in read-only mode (`mount -o ro`) when analyzing physical partitions.
+- Ensure that memory dump captures do not corrupt target process state.
+

@@ -301,8 +301,7 @@ class RegistryExecutor(BaseExecutor):
                     "tool": step.tool,
                 }
 
-        if self._permission_gate:
-            await self._check_permissions(step)
+        await self._check_permissions(step)
         if not self._budget.consume_tool_call():
             return {"status": "error", "error": "Tool call budget exhausted"}
 

@@ -11,6 +11,20 @@ def register_profile(manager: ProviderManager) -> None:
             display_name="OpenAI",
             models=[
                 ModelInfo(
+                    "gpt-5.6",
+                    supports_vision=True,
+                    supports_structured_output=True,
+                    context_window=1500000,
+                    cost_tier=CostTier.HIGH,
+                ),
+                ModelInfo(
+                    "gpt-5-turbo",
+                    supports_vision=True,
+                    supports_structured_output=True,
+                    context_window=1000000,
+                    cost_tier=CostTier.MEDIUM,
+                ),
+                ModelInfo(
                     "gpt-5.5",
                     supports_vision=True,
                     supports_structured_output=True,

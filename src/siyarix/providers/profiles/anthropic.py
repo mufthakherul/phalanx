@@ -11,6 +11,20 @@ def register_profile(manager: ProviderManager) -> None:
             display_name="Anthropic",
             models=[
                 ModelInfo(
+                    "claude-sonnet-5",
+                    supports_vision=True,
+                    supports_structured_output=True,
+                    context_window=200000,
+                    cost_tier=CostTier.MEDIUM,
+                ),
+                ModelInfo(
+                    "claude-mythos-5",
+                    supports_vision=True,
+                    supports_structured_output=True,
+                    context_window=1000000,
+                    cost_tier=CostTier.HIGH,
+                ),
+                ModelInfo(
                     "claude-fable-5",
                     supports_vision=True,
                     supports_structured_output=True,

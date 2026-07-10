@@ -60,6 +60,10 @@ _ARG_META: dict[str, str] = {
     "command_text": "command string to save",
     "stealth_action": "status / on / off / level",
     "audit_action": "export / status / verify",
+    "key_action": "set / remove / list / rotate",
+    "config_key": "config key name",
+    "stealth_level": "none / light / medium / heavy / paranoid",
+    "theme_action": "list / preview / set",
     "queue_action": "status / list / retry / clear / flush",
     "cache_action": "status / clear / invalidate",
     "perf_action": "status / tune / configure",
@@ -130,6 +134,9 @@ class SmartAutocomplete(Completer):
         "/stats": "detail",
         "/plugins": "plugins_action",
         "/review": "toggle",
+        "/m": "mode",
+        "/undo": "number",
+        "/rollback": "number",
         "/help": "text",
         "/h": "text",
         "/?": "text",
@@ -211,6 +218,64 @@ class SmartAutocomplete(Completer):
         "provider": [],
         "model": [],
         "tool": [],
+        "key_action": ["set", "remove", "list", "rotate"],
+        "stealth_level": ["none", "light", "medium", "heavy", "paranoid"],
+        "theme_action": ["list", "preview", "set"],
+        "config_key": [
+            "default_output_format",
+            "default_parallel",
+            "scan_timeout",
+            "auto_sync",
+            "color_theme",
+            "syntax_theme",
+            "log_level",
+            "tls_verify",
+            "model_provider",
+            "openai_model",
+            "anthropic_model",
+            "gemini_model",
+            "groq_model",
+            "together_model",
+            "openrouter_model",
+            "deepseek_model",
+            "xai_model",
+            "mistral_model",
+            "perplexity_model",
+            "azure_model",
+            "cerebras_model",
+            "fireworks_model",
+            "zai_model",
+            "minimax_model",
+            "moonshot_model",
+            "nvidia_model",
+            "opencode_zen_model",
+            "huggingface_model",
+            "ollama_url",
+            "ollama_model",
+            "lmstudio_url",
+            "lmstudio_model",
+            "llamacpp_url",
+            "llamacpp_model",
+            "vllm_url",
+            "vllm_model",
+            "localai_url",
+            "localai_model",
+            "registry_model",
+            "registry_url",
+            "auto_update_check",
+            "agent_timeout",
+            "default_mode",
+            "stealth_mode",
+            "persona",
+            "command_review",
+            "additional_system_message",
+            "max_waves",
+            "notifications_enabled",
+            "history_retention_days",
+            "multiline",
+            "auto_save_session",
+            "token_saver",
+        ],
     }
 
     def __init__(self, session: Any = None) -> None:
@@ -351,10 +416,11 @@ class SmartAutocomplete(Completer):
         text = document.text_before_cursor
 
         if text.startswith("/"):
+            has_trailing_space = text.endswith(" ")
             parts = text.split()
             cmd = parts[0] if parts else ""
 
-            if len(parts) <= 1:
+            if len(parts) <= 1 and not has_trailing_space:
                 prefix = cmd.lstrip("/")
                 current_mode = (
                     getattr(self._session, "mode", "integrated") if self._session else "integrated"
@@ -397,9 +463,136 @@ class SmartAutocomplete(Completer):
                         )
                 return
 
-            arg_type = self._ARG_COMMANDS.get(cmd)
+            args_typed = parts[1:] + [""] if has_trailing_space else parts[1:]
+            arg_idx = len(args_typed) - 1
+            prefix = args_typed[-1]
+
+            arg_type = None
+
+            if cmd in ("/key", "/keys"):
+                if arg_idx == 0:
+                    arg_type = "key_action"
+                elif arg_idx == 1:
+                    action = args_typed[0].lower() if len(args_typed) > 1 else ""
+                    if action in ("set", "remove", "rotate"):
+                        arg_type = "provider"
+            elif cmd == "/config":
+                if arg_idx == 0:
+                    arg_type = "config_action"
+                elif arg_idx == 1:
+                    action = args_typed[0].lower() if len(args_typed) > 1 else ""
+                    if action in ("set", "get"):
+                        arg_type = "config_key"
+            elif cmd == "/theme":
+                if arg_idx == 0:
+                    arg_type = "theme_action"
+                elif arg_idx == 1:
+                    arg_type = "theme"
+            elif cmd == "/stealth":
+                if arg_idx == 0:
+                    arg_type = "stealth_action"
+                elif arg_idx == 1:
+                    action = args_typed[0].lower() if len(args_typed) > 1 else ""
+                    if action == "level":
+                        arg_type = "stealth_level"
+            elif cmd == "/audit":
+                if arg_idx == 0:
+                    arg_type = "audit_action"
+            elif cmd == "/queue":
+                if arg_idx == 0:
+                    arg_type = "queue_action"
+            elif cmd == "/cache":
+                if arg_idx == 0:
+                    arg_type = "cache_action"
+                elif arg_idx == 1:
+                    action = args_typed[0].lower() if len(args_typed) > 1 else ""
+                    if action == "invalidate":
+                        arg_type = "target"
+            elif cmd == "/performance":
+                if arg_idx == 0:
+                    arg_type = "perf_action"
+            elif cmd == "/campaign":
+                if arg_idx == 0:
+                    arg_type = "campaign_action"
+            elif cmd == "/ticket":
+                if arg_idx == 0:
+                    arg_type = "ticket_action"
+            elif cmd == "/retest":
+                if arg_idx == 0:
+                    arg_type = "retest_action"
+            elif cmd == "/opsec":
+                if arg_idx == 0:
+                    arg_type = "opsec_action"
+            elif cmd == "/agent":
+                if arg_idx == 0:
+                    arg_type = "agent_action"
+            elif cmd == "/intel":
+                if arg_idx == 0:
+                    arg_type = "intel_action"
+            elif cmd == "/kb":
+                if arg_idx == 0:
+                    arg_type = "kb_action"
+            elif cmd == "/skills":
+                if arg_idx == 0:
+                    arg_type = "skills_action"
+            elif cmd == "/docs":
+                if arg_idx == 0:
+                    arg_type = "section"
+            elif cmd == "/tutorial":
+                if arg_idx == 0:
+                    arg_type = "topic"
+            elif cmd == "/benchmark":
+                if arg_idx == 0:
+                    arg_type = "provider"
+                elif arg_idx == 1:
+                    arg_type = "model"
+            elif cmd == "/split":
+                if arg_idx == 0:
+                    arg_type = "split_type"
+            elif cmd == "/socket":
+                if arg_idx == 0:
+                    arg_type = "socket_action"
+            elif cmd == "/save":
+                if arg_idx == 0:
+                    arg_type = "session_id"
+            elif cmd == "/cmd":
+                if arg_idx == 0:
+                    arg_type = "profile_name"
+            elif cmd == "/tools":
+                if arg_idx == 0:
+                    arg_type = "category"
+            elif cmd == "/translate":
+                if arg_idx == 0:
+                    arg_type = "intent"
+            elif cmd == "/savecmd":
+                if arg_idx == 0:
+                    arg_type = "command_text"
+            elif cmd == "/siem":
+                if arg_idx == 0:
+                    arg_type = "siem_action"
+            elif cmd == "/stats":
+                if arg_idx == 0:
+                    arg_type = "detail"
+            elif cmd == "/plugins":
+                if arg_idx == 0:
+                    arg_type = "plugins_action"
+            elif cmd == "/review":
+                if arg_idx == 0:
+                    arg_type = "toggle"
+            elif cmd in ("/help", "/h", "/?"):
+                if arg_idx == 0:
+                    arg_type = "text"
+            elif cmd in ("/mode", "/m"):
+                if arg_idx == 0:
+                    arg_type = "mode"
+            elif cmd in ("/undo", "/rollback"):
+                if arg_idx == 0:
+                    arg_type = "number"
+
+            if arg_type is None and arg_idx == 0:
+                arg_type = self._ARG_COMMANDS.get(cmd)
+
             if arg_type:
-                prefix = parts[-1]
                 yield from self._complete_arg(arg_type, prefix)
             return
 

@@ -313,10 +313,108 @@ class BaseExecutor:
             return dlp.redact_dict(result)  # type: ignore[no-any-return]
         return result
 
+    def check_scope(self, command: str) -> None:
+        """Enforce authorized targets check against SIYARIX_ALLOWED_SCOPE."""
+        import os
+        import ipaddress
+        import re
+
+        scope_env = os.environ.get("SIYARIX_ALLOWED_SCOPE", "")
+        if not scope_env:
+            return
+
+        allowed_items = [item.strip().lower() for item in scope_env.split(",") if item.strip()]
+        if not allowed_items:
+            return
+
+        ipv4_pattern = r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b"
+        domain_pattern = r"\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b"
+
+        found_ips = re.findall(ipv4_pattern, command)
+        found_domains = [d.lower() for d in re.findall(domain_pattern, command)]
+
+        whitelist = {
+            "github.com", "python.org", "pypi.org", "google.com", "microsoft.com",
+            "ubuntu.com", "debian.org", "apple.com", "crt.sh", "localhost"
+        }
+
+        # Verify IPs
+        for ip_str in found_ips:
+            if ip_str == "127.0.0.1":
+                continue
+            is_allowed = False
+            try:
+                ip = ipaddress.ip_address(ip_str)
+                for allowed in allowed_items:
+                    if "/" in allowed:
+                        net = ipaddress.ip_network(allowed, strict=False)
+                        if ip in net:
+                            is_allowed = True
+                            break
+                    else:
+                        try:
+                            allowed_ip = ipaddress.ip_address(allowed)
+                            if ip == allowed_ip:
+                                is_allowed = True
+                                break
+                        except ValueError:
+                            pass
+            except ValueError:
+                continue
+            
+            if not is_allowed:
+                raise PermissionDeniedError(f"Target IP {ip_str} is out of authorized scope: {scope_env}")
+
+        # Verify Domains
+        for domain in found_domains:
+            if domain in whitelist or domain.endswith(".local") or domain == "localhost":
+                continue
+            is_allowed = False
+            for allowed in allowed_items:
+                if allowed.startswith("*."):
+                     suffix = allowed[1:]
+                     if domain.endswith(suffix) or domain == allowed[2:]:
+                         is_allowed = True
+                         break
+                elif domain == allowed:
+                     is_allowed = True
+                     break
+            
+            has_domain_in_scope = any(not re.match(r"^[\d./]+$", x) for x in allowed_items)
+            if not is_allowed and has_domain_in_scope:
+                raise PermissionDeniedError(f"Target domain {domain} is out of authorized scope: {scope_env}")
+
+    def check_destructive(self, command: str) -> None:
+        """Block fork bombs, block device overwrites, system dir deletions, and partitioning."""
+        cmd_clean = command.strip().lower()
+
+        # Fork bomb patterns
+        if ":(){" in cmd_clean or "::&" in cmd_clean:
+            raise PermissionDeniedError("Destructive command detected: Fork bomb execution is blocked.")
+
+        # Block device overwrite
+        if "dd " in cmd_clean and "of=/dev/" in cmd_clean:
+            if not any(x in cmd_clean for x in ["of=/dev/null", "of=/dev/zero"]):
+                raise PermissionDeniedError("Destructive command detected: Overwriting block devices is blocked.")
+
+        # Recursive deletion of critical paths
+        if "rm " in cmd_clean and "-rf" in cmd_clean:
+            if any(path in cmd_clean for path in [" /", " /*", " /etc", " /var", " /bin", " /sbin", " /usr"]):
+                raise PermissionDeniedError("Destructive command detected: Deleting system directory is blocked.")
+
+        # Partition formatting
+        if any(x in cmd_clean for x in ["mkfs ", "mkfs.", "fdisk ", "parted "]):
+            if any(flag in cmd_clean for flag in ["-d", "--destroy", "format", "delete"]):
+                raise PermissionDeniedError("Destructive command detected: Formatting storage devices is blocked.")
+
     async def _check_permissions(self, step: PlanStep) -> None:
+        command = step.command or step.args.get("command", "")
+        if command:
+            self.check_destructive(command)
+            self.check_scope(command)
+
         if not self._permission_gate:
             return
-        command = step.command or step.args.get("command", "")
         review_and_confirm = _get_review_and_confirm()
 
         if command:
