@@ -92,7 +92,7 @@ choco install siyarix
 
 ### Debian / Ubuntu / Kali Linux
 ```bash
-sudo dpkg -i packages/deb/siyarix_1.0.1-1_all.deb
+sudo dpkg -i packages/deb/siyarix_1.1.0-1_all.deb
 ```
 
 ### Docker

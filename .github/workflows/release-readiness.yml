@@ -7,7 +7,13 @@ on:
       - '.github/workflows/release.yml'
       - 'pyproject.toml'
       - 'src/siyarix/__init__.py'
+      - 'installer/install.sh'
+      - 'installer/install-termux.sh'
       - 'installer/install.ps1'
+      - 'packages/chocolatey/siyarix.nuspec'
+      - 'packages/deb/DEBIAN/control'
+      - 'packages/homebrew/siyarix.rb'
+      - 'packages/winget/*.yaml'
       - 'packages/deb/**'
   workflow_dispatch:
 
@@ -51,10 +57,66 @@ jobs:
             raise SystemExit("Unable to find $__script_version in installer/install.ps1")
           ps1_version = ps1_match.group(1)
 
+          install_sh = Path("installer/install.sh").read_text(encoding="utf-8")
+          sh_match = re.search(r'SIYARIX_VERSION="\$\{SIYARIX_VERSION:-([^}]+)\}"', install_sh)
+          if not sh_match:
+            raise SystemExit("Unable to find SIYARIX_VERSION in installer/install.sh")
+          sh_version = sh_match.group(1)
+
+          install_termux_sh = Path("installer/install-termux.sh").read_text(encoding="utf-8")
+          termux_match = re.search(r'SIYARIX_VERSION="\$\{SIYARIX_VERSION:-([^}]+)\}"', install_termux_sh)
+          if not termux_match:
+            raise SystemExit("Unable to find SIYARIX_VERSION in installer/install-termux.sh")
+          termux_version = termux_match.group(1)
+
+          deb_control = Path("packages/deb/DEBIAN/control").read_text(encoding="utf-8")
+          deb_match = re.search(r'^Version:\s*([^\n]+)$', deb_control, re.MULTILINE)
+          if not deb_match:
+            raise SystemExit("Unable to find Version in packages/deb/DEBIAN/control")
+          deb_version = deb_match.group(1).strip()
+
+          choco_nuspec = Path("packages/chocolatey/siyarix.nuspec").read_text(encoding="utf-8")
+          choco_match = re.search(r'<version>([^<]+)</version>', choco_nuspec)
+          if not choco_match:
+            raise SystemExit("Unable to find version in packages/chocolatey/siyarix.nuspec")
+          choco_version = choco_match.group(1).strip()
+
+          homebrew_rb = Path("packages/homebrew/siyarix.rb").read_text(encoding="utf-8")
+          homebrew_match = re.search(r'/tags/v([^/]+)\.tar\.gz', homebrew_rb)
+          if not homebrew_match:
+            raise SystemExit("Unable to find tag version in packages/homebrew/siyarix.rb")
+          homebrew_version = homebrew_match.group(1).strip()
+
+          winget_installer = Path("packages/winget/Mufthakherul.Siyarix.installer.yaml").read_text(encoding="utf-8")
+          winget_installer_match = re.search(r'"PackageVersion"\s*:\s*"([^"]+)"', winget_installer)
+          if not winget_installer_match:
+            raise SystemExit("Unable to find PackageVersion in winget installer manifest")
+          winget_installer_version = winget_installer_match.group(1).strip()
+
+          winget_version = Path("packages/winget/Mufthakherul.Siyarix.yaml").read_text(encoding="utf-8")
+          winget_version_match = re.search(r'"PackageVersion"\s*:\s*"([^"]+)"', winget_version)
+          if not winget_version_match:
+            raise SystemExit("Unable to find PackageVersion in winget version manifest")
+          winget_version_version = winget_version_match.group(1).strip()
+
+          winget_locale = Path("packages/winget/Mufthakherul.Siyarix.locale.en-US.yaml").read_text(encoding="utf-8")
+          winget_locale_match = re.search(r'"PackageVersion"\s*:\s*"([^"]+)"', winget_locale)
+          if not winget_locale_match:
+            raise SystemExit("Unable to find PackageVersion in winget locale manifest")
+          winget_locale_version = winget_locale_match.group(1).strip()
+
           versions = {
               "pyproject.toml": pyproject_version,
               "src/siyarix/__init__.py": init_version,
               "installer/install.ps1": ps1_version,
+              "installer/install.sh": sh_version,
+              "installer/install-termux.sh": termux_version,
+              "packages/deb/DEBIAN/control": deb_version,
+              "packages/chocolatey/siyarix.nuspec": choco_version,
+              "packages/homebrew/siyarix.rb": homebrew_version,
+              "packages/winget/Mufthakherul.Siyarix.installer.yaml": winget_installer_version,
+              "packages/winget/Mufthakherul.Siyarix.yaml": winget_version_version,
+              "packages/winget/Mufthakherul.Siyarix.locale.en-US.yaml": winget_locale_version,
           }
           unique_versions = set(versions.values())
           if len(unique_versions) != 1:

@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $packageName = 'siyarix'
-$version = '1.0.1'
+$version = '1.1.0'
 
 Write-Host "Uninstalling $packageName $version..."
 

@@ -6,21 +6,21 @@
 # =============================================================================
 set -euo pipefail
 
-SIYARIX_VERSION="1.0.1"
+SIYARIX_VERSION="1.1.0"
 DRY_RUN=0
 UNINSTALL_MODE=""
 AUTO_CONFIRM=0
 PYTHON=""
 
 banner() {
-  cat << 'EOF'
+  cat << EOF
    ███████╗██╗██╗   ██╗ █████╗ ██████╗ ██╗██╗  ██╗
    ██╔════╝██╚██╗ ██╔╝██╔══██╗██╔══██╗██║╚██╗██╔╝
    ███████╗██║╚████╔╝ ███████║██████╔╝██║ ╚███╔╝
    ╚════██║██║ ╚██╔╝  ██╔══██║██╔══██╗██║ ██╔██╗
    ███████║██║  ██║   ██║  ██║██║  ██║██║██╔╝ ██╗
    ╚══════╝╚═╝  ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
-   AI Cybersecurity Orchestration Agent Uninstaller
+   AI Cybersecurity Orchestration Agent Uninstaller v${SIYARIX_VERSION}
 EOF
 }
 

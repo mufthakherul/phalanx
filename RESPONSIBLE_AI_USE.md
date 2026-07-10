@@ -1,8 +1,8 @@
 # Responsible AI Use Policy
 
 **Effective Date:** June 2026
-**Version:** 1.0.1
-**Applies to:** All AI-powered features of Siyarix v1.0.1
+**Version:** 1.1.0
+**Applies to:** All AI-powered features of Siyarix v1.1.0
 
 Siyarix integrates artificial intelligence models from multiple providers to assist with cybersecurity tasks including planning, analysis, code generation, and automation. This policy defines the principles, expectations, limitations, and responsibilities governing the use of Siyarix's AI-powered features.
 
