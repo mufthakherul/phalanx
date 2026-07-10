@@ -1,4 +1,4 @@
-name: Package Size Tracker
+name: "GitHub Actions - Package Size Tracker"
 
 on:
   pull_request:

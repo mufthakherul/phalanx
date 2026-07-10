@@ -1,4 +1,4 @@
-name: Docs
+name: "GitHub Actions - Docs"
 
 on:
   push:

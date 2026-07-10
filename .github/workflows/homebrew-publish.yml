@@ -1,4 +1,4 @@
-name: Publish Homebrew Formula
+name: "GitHub Actions - Publish Homebrew Formula"
 
 on:
   release:

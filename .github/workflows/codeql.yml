@@ -1,4 +1,4 @@
-name: "CodeQL Security Analysis"
+name: "GitHub Actions - CodeQL Security Analysis"
 
 permissions: read-all
 

@@ -1,4 +1,4 @@
-name: "Self-Healing PR (Auto-Format)"
+name: "GitHub Actions - Self-Healing PR (Auto-Format)"
 on:
   pull_request_target:
     types: [opened, synchronize]

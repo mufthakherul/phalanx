@@ -1,4 +1,4 @@
-name: Build Packages
+name: "GitHub Actions - Build Packages"
 
 on:
   push:

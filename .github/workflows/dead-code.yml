@@ -1,4 +1,4 @@
-name: Dead Code Detection
+name: "GitHub Actions - Dead Code Detection"
 
 on:
   pull_request:

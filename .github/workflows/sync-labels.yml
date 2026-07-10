@@ -1,4 +1,4 @@
-name: "Sync Repository Labels"
+name: "GitHub Actions - Sync Repository Labels"
 on:
   push:
     branches:

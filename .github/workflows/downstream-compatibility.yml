@@ -1,4 +1,4 @@
-name: Downstream Compatibility
+name: "GitHub Actions - Downstream Compatibility"
 
 on:
   pull_request:

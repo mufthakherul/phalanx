@@ -1,4 +1,4 @@
-name: CI
+name: "GitHub Actions - CI"
 
 permissions: read-all
 

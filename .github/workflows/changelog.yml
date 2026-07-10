@@ -1,4 +1,4 @@
-name: Generate Changelog
+name: "GitHub Actions - Generate Changelog"
 
 on:
   push:

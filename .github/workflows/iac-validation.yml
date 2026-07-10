@@ -1,4 +1,4 @@
-name: Infrastructure-as-Code Validation
+name: "GitHub Actions - Infrastructure-as-Code Validation"
 
 on:
   pull_request:

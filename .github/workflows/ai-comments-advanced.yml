@@ -1,4 +1,4 @@
-name: AI Code Comments Advanced
+name: "GitHub Actions - AI Code Comments Advanced"
 
 on:
   workflow_dispatch:

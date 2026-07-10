@@ -1,4 +1,4 @@
-name: Sync Release to Stable
+name: "GitHub Actions - Sync Release to Stable"
 
 on:
   release:

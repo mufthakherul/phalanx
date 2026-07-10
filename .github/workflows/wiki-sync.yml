@@ -1,4 +1,4 @@
-name: Sync Docs to Wiki
+name: "GitHub Actions - Sync Docs to Wiki"
 
 on:
   release:

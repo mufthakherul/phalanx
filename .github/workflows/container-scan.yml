@@ -1,4 +1,4 @@
-name: "Container Security Scan"
+name: "GitHub Actions - Container Security Scan"
 on:
   push:
     branches: [ "main" ]

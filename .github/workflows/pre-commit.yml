@@ -1,4 +1,4 @@
-name: Pre-Commit
+name: "GitHub Actions - Pre-Commit"
 
 on:
   pull_request:

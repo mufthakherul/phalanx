@@ -1,4 +1,4 @@
-name: Dependency Updates Automation
+name: "GitHub Actions - Dependency Updates Automation"
 
 on:
   schedule:

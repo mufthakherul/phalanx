@@ -1,4 +1,4 @@
-name: Reproducible Build Check
+name: "GitHub Actions - Reproducible Build Check"
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: Performance Benchmark
+name: "GitHub Actions - Performance Benchmark"
 
 on:
   pull_request:

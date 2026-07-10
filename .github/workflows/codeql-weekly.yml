@@ -1,4 +1,4 @@
-name: "CodeQL Weekly Deep Scan"
+name: "GitHub Actions - CodeQL Weekly Deep Scan"
 permissions: read-all
 on:
   schedule:

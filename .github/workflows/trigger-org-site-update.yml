@@ -1,4 +1,4 @@
-name: Trigger Org Site Update
+name: "GitHub Actions - Trigger Org Site Update"
 
 on:
   push:

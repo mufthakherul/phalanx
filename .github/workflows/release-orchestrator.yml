@@ -1,4 +1,4 @@
-name: Release Orchestrator
+name: "GitHub Actions - Release Orchestrator"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Publish Docker Image
+name: "GitHub Actions - Publish Docker Image"
 
 permissions: read-all
 

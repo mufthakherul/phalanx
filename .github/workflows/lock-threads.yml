@@ -1,4 +1,4 @@
-name: 'Lock Threads'
+name: "GitHub Actions - Lock Threads"
 
 on:
   schedule:
