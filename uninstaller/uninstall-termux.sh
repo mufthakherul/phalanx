@@ -65,7 +65,7 @@ remove_siyarix_from_profile() {
     info "Cleaning up profile: $file"
     local tmp
     tmp=$(mktemp)
-    
+
     # Filter out Siyarix block added by installer
     awk '
     /# Siyarix PATH/ { skip = 2; next }
@@ -75,7 +75,7 @@ remove_siyarix_from_profile() {
     /alias siyarix=/ { next }
     { print }
     ' "$file" > "$tmp"
-    
+
     mv "$tmp" "$file"
     ok "Profile $file cleaned."
   fi
@@ -89,7 +89,7 @@ clean_history_file() {
       info "[DRY-RUN] Would purge Siyarix commands from history: $hist_file"
       return 0
     fi
-    
+
     info "Purging Siyarix commands from history: $hist_file"
     local tmp
     tmp=$(mktemp)
@@ -259,7 +259,7 @@ main() {
       echo "  1) Regular [Normal package uninstall]"
       echo "  2) Deep Dive [Forensic cleanup: Purge configs, models, caches, logs, keyring, history]"
       echo -n "Select option (1 or 2): "
-      
+
       local choice=""
       read -r choice
       if [ "$choice" = "2" ]; then

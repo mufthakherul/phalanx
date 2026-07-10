@@ -1,7 +1,7 @@
 # Siyarix v1.1.0 — Release Readiness & Distribution Improvements
 
-**Release Date:** 2026-07-10  
-**Version:** 1.1.0  
+**Release Date:** 2026-07-10
+**Version:** 1.1.0
 **Status:** Stable Release
 
 ## Overview

@@ -102,4 +102,3 @@ This document contains all operational rules for Siyarix. These rules govern how
 - Never modify access, modification, or creation timestamps (MAC times) of investigated system files.
 - Operate in read-only mode (`mount -o ro`) when analyzing physical partitions.
 - Ensure that memory dump captures do not corrupt target process state.
-
