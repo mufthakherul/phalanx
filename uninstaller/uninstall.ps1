@@ -6,7 +6,7 @@
 # =============================================================================
 
 $ErrorActionPreference = 'Stop'
-$SIYARIX_VERSION = "1.0.1"
+$SIYARIX_VERSION = "1.1.0"
 
 function Write-Banner {
   Write-Host @"
@@ -16,7 +16,7 @@ function Write-Banner {
    ╚════██║██║ ╚██╔╝  ██╔══██║██╔══██╗██║ ██╔██╗
    ███████║██║  ██║   ██║  ██║██║  ██║██║██╔╝ ██╗
    ╚══════╝╚═╝  ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
-   AI Cybersecurity Orchestration Agent Windows Uninstaller
+   AI Cybersecurity Orchestration Agent Windows Uninstaller v$SIYARIX_VERSION
 "@ -ForegroundColor Cyan
 }
 

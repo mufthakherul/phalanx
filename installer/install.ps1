@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 # =============================================================================
 # Siyarix Universal Installer for Windows
-#   One-liner: irm https://siyarix.github.io/install.ps1 | iex
+#   One-liner: irm https://siyarix.github.io/installer/install.ps1 | iex
 #
 # Supports: Windows 10/11, Windows Server 2019/2022/2025
 # Package managers: pipx, pip, winget, chocolatey, scoop
@@ -11,7 +11,7 @@
 # =============================================================================
 
 $ErrorActionPreference = 'Stop'
-$__script_version = "1.0.1"
+$__script_version = "1.1.0"
 
 function Write-Banner {
   Write-Host @"
@@ -211,7 +211,7 @@ function Main {
       '--version' { $version = $args[++$i] }
       '--dry-run' { $dryRun = $true }
       '--help' {
-        Write-Host "Usage: irm https://siyarix.github.io/install.ps1 | iex"
+        Write-Host "Usage: irm https://siyarix.github.io/installer/install.ps1 | iex"
         Write-Host ""
         Write-Host "Options:"
         Write-Host "  --version VERSION    Version to install"

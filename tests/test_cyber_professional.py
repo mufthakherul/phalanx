@@ -7,9 +7,11 @@ from siyarix.executor import BaseExecutor, PermissionDeniedError
 from siyarix.output import OutputEngine, OutputFormat
 from siyarix.models import PlanStep
 
+
 class MockExecutor(BaseExecutor):
     async def _execute_step(self, step: PlanStep) -> dict:
         return {"status": "success"}
+
 
 def test_target_normalization():
     nlp = NaturalLanguageParser()
@@ -17,23 +19,27 @@ def test_target_normalization():
     assert nlp.normalize_target("TARGET.local.", "domain") == "target.local"
     assert nlp.normalize_target("[10.0.0.1]", "ipv4") == "10.0.0.1"
 
+
 def test_cyber_parameters_extraction():
     nlp = NaturalLanguageParser()
-    params = nlp.extract_parameters("scan 192.168.1.1 -p 80,443 --threads 16 ua 'Mozilla/5.0' cookie 'session=abc' verbosity high")
+    params = nlp.extract_parameters(
+        "scan 192.168.1.1 -p 80,443 --threads 16 ua 'Mozilla/5.0' cookie 'session=abc' verbosity high"
+    )
     assert params.get("ports") == "80,443"
     assert params.get("threads") == "16"
     assert params.get("user_agent") == "mozilla/5.0"
     assert params.get("cookie") == "session=abc"
     assert params.get("verbosity") == "high"
 
+
 @pytest.mark.asyncio
 async def test_scope_enforcement():
     executor = MockExecutor()
     os.environ["SIYARIX_ALLOWED_SCOPE"] = "192.168.1.0/24,target.local"
-    
+
     # Allowed IP
     step_allowed_ip = PlanStep(tool="nmap", command="nmap 192.168.1.5")
-    await executor._check_permissions(step_allowed_ip) # should pass
+    await executor._check_permissions(step_allowed_ip)  # should pass
 
     # Forbidden IP
     step_forbidden_ip = PlanStep(tool="nmap", command="nmap 10.0.0.1")
@@ -43,7 +49,7 @@ async def test_scope_enforcement():
 
     # Allowed Domain
     step_allowed_domain = PlanStep(tool="nmap", command="nmap target.local")
-    await executor._check_permissions(step_allowed_domain) # should pass
+    await executor._check_permissions(step_allowed_domain)  # should pass
 
     # Forbidden Domain
     step_forbidden_domain = PlanStep(tool="nmap", command="nmap untrusted.com")
@@ -53,6 +59,7 @@ async def test_scope_enforcement():
 
     # Clean up
     del os.environ["SIYARIX_ALLOWED_SCOPE"]
+
 
 @pytest.mark.asyncio
 async def test_destructive_command_blocking():
@@ -82,24 +89,34 @@ async def test_destructive_command_blocking():
         await executor._check_permissions(step_mkfs)
     assert "Formatting storage devices" in str(exc_info.value)
 
+
 def test_output_engine_reporting_methods():
     engine = OutputEngine(output_format=OutputFormat.TABLE)
-    
+
     # Verify these do not throw exceptions
-    engine.print_mitre_mapping([
-        {"id": "T1046", "name": "Network Service Scanning", "tactic": "Discovery", "tool": "nmap"}
-    ])
+    engine.print_mitre_mapping(
+        [{"id": "T1046", "name": "Network Service Scanning", "tactic": "Discovery", "tool": "nmap"}]
+    )
 
-    engine.print_finding_panel({
-        "title": "SQL Injection",
-        "cve": "CVE-2023-xxxx",
-        "cvss": "9.8",
-        "description": "SQL injection vulnerability in endpoint",
-        "poc": "SELECT * FROM users WHERE id = 1'",
-        "remediation": "Use parameterized queries.",
-        "severity": "Critical"
-    })
+    engine.print_finding_panel(
+        {
+            "title": "SQL Injection",
+            "cve": "CVE-2023-xxxx",
+            "cvss": "9.8",
+            "description": "SQL injection vulnerability in endpoint",
+            "poc": "SELECT * FROM users WHERE id = 1'",
+            "remediation": "Use parameterized queries.",
+            "severity": "Critical",
+        }
+    )
 
-    engine.print_timeline([
-        {"timestamp": "2026-07-03 00:00:00", "source": "auth.log", "event_type": "Failed Login", "details": "Multiple failed logins from 192.168.1.100"}
-    ])
+    engine.print_timeline(
+        [
+            {
+                "timestamp": "2026-07-03 00:00:00",
+                "source": "auth.log",
+                "event_type": "Failed Login",
+                "details": "Multiple failed logins from 192.168.1.100",
+            }
+        ]
+    )

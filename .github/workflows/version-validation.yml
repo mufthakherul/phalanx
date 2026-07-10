@@ -128,6 +128,42 @@ jobs:
               m = re.search(r"\$__script_version = \"(.+)\"", f.read())
               versions["installer/install.ps1"] = m.group(1) if m else "NOT FOUND"
 
+          # installer/install.sh
+          with open("installer/install.sh") as f:
+              m = re.search(r'SIYARIX_VERSION=\"\\$\\{SIYARIX_VERSION:-([^}]+)\\}\"', f.read())
+              versions["installer/install.sh"] = m.group(1) if m else "NOT FOUND"
+
+          # installer/install-termux.sh
+          with open("installer/install-termux.sh") as f:
+              m = re.search(r'SIYARIX_VERSION=\"\\$\\{SIYARIX_VERSION:-([^}]+)\\}\"', f.read())
+              versions["installer/install-termux.sh"] = m.group(1) if m else "NOT FOUND"
+
+          # packages/deb/DEBIAN/control
+          with open("packages/deb/DEBIAN/control") as f:
+              m = re.search(r"^Version:\\s*(.+)$", f.read(), re.MULTILINE)
+              versions["packages/deb/DEBIAN/control"] = m.group(1).strip() if m else "NOT FOUND"
+
+          # packages/chocolatey/siyarix.nuspec
+          with open("packages/chocolatey/siyarix.nuspec") as f:
+              m = re.search(r"<version>([^<]+)</version>", f.read())
+              versions["packages/chocolatey/siyarix.nuspec"] = m.group(1).strip() if m else "NOT FOUND"
+
+          # packages/homebrew/siyarix.rb
+          with open("packages/homebrew/siyarix.rb") as f:
+              m = re.search(r"/tags/v([^/]+)\\.tar\\.gz", f.read())
+              versions["packages/homebrew/siyarix.rb"] = m.group(1).strip() if m else "NOT FOUND"
+
+          # Winget manifests
+          with open("packages/winget/Mufthakherul.Siyarix.installer.yaml") as f:
+              m = re.search(r'"PackageVersion"\\s*:\\s*"([^"]+)"', f.read())
+              versions["packages/winget/Mufthakherul.Siyarix.installer.yaml"] = m.group(1).strip() if m else "NOT FOUND"
+          with open("packages/winget/Mufthakherul.Siyarix.yaml") as f:
+              m = re.search(r'"PackageVersion"\\s*:\\s*"([^"]+)"', f.read())
+              versions["packages/winget/Mufthakherul.Siyarix.yaml"] = m.group(1).strip() if m else "NOT FOUND"
+          with open("packages/winget/Mufthakherul.Siyarix.locale.en-US.yaml") as f:
+              m = re.search(r'"PackageVersion"\\s*:\\s*"([^"]+)"', f.read())
+              versions["packages/winget/Mufthakherul.Siyarix.locale.en-US.yaml"] = m.group(1).strip() if m else "NOT FOUND"
+
           all_match = len(set(versions.values())) == 1
           print(f"Version consistency: {\"PASSED\" if all_match else \"FAILED\"}")
           for src, ver in versions.items():

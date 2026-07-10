@@ -1,7 +1,7 @@
 # Siyarix Brand Policy
 
 **Effective Date:** June 2026
-**Version:** 1.0.1
+**Version:** 1.1.0
 
 This policy governs the use of the Siyarix name, logos, visual assets, and related brand identifiers. It is designed to protect the integrity and reputation of the project while remaining open-source friendly and supportive of community growth.
 

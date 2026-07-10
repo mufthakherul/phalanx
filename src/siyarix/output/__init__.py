@@ -284,15 +284,18 @@ class OutputEngine:
             content.append("CVE: ", style="bold")
             content.append(f"{cve}\n")
             content.append("CVSS: ", style="bold")
-            content.append(f"{cvss}\n\n", style="bold red" if "critical" in severity or "high" in severity else "")
-            
+            content.append(
+                f"{cvss}\n\n",
+                style="bold red" if "critical" in severity or "high" in severity else "",
+            )
+
             content.append("Description:\n", style="bold")
             content.append(f"{desc}\n\n")
-            
+
             if poc:
                 content.append("Proof of Concept:\n", style="bold")
                 content.append(f"{poc}\n\n", style="dim")
-                
+
             if rem:
                 content.append("Remediation:\n", style="bold")
                 content.append(f"{rem}\n", style="green")

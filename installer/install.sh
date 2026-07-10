@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # =============================================================================
 # Siyarix Universal Installer
-#   One-liner: curl -fsSL https://siyarix.github.io/install.sh | bash
+#   One-liner: curl -fsSL https://siyarix.github.io/installer/install.sh | bash
 # =============================================================================
 set -euo pipefail
 
-SIYARIX_VERSION="${SIYARIX_VERSION:-1.0.1}"
+SIYARIX_VERSION="${SIYARIX_VERSION:-1.1.0}"
 PYTHON_MIN_MAJOR=3
 PYTHON_MIN_MINOR=11
 INSTALL_METHOD=""
@@ -15,7 +15,7 @@ OS_LIKE=""
 PYTHON=""
 
 banner() {
-  cat << 'EOF'
+  cat << EOF
    ███████╗██╗██╗   ██╗ █████╗ ██████╗ ██╗██╗  ██╗
    ██╔════╝██╚██╗ ██╔╝██╔══██╗██╔══██╗██║╚██╗██╔╝
    ███████╗██║╚████╔╝ ███████║██████╔╝██║ ╚███╔╝
@@ -533,7 +533,7 @@ main() {
   while [ $# -gt 0 ]; do
     case "$1" in
       --help|-h)
-        echo "Usage: curl -fsSL https://siyarix.github.io/install.sh | bash [-- [options]]"
+        echo "Usage: curl -fsSL https://siyarix.github.io/installer/install.sh | bash [-- [options]]"
         echo ""
         echo "Options:"
         echo "  --version VERSION    Version to install (or set SIYARIX_VERSION)"
@@ -541,7 +541,7 @@ main() {
         echo "  --help, -h           Show this help message"
         echo ""
         echo "Environment variables:"
-        echo "  SIYARIX_VERSION    Version to install (default: 1.0.1)"
+        echo "  SIYARIX_VERSION    Version to install (default: 1.1.0)"
         echo "  SIYARIX_DRY_RUN    Set to 1 for dry-run (default: 0)"
         echo "  SIYARIX_APT_REPO   Custom APT repository URL"
         echo "  SIYARIX_APT_KEY    Custom APT repository GPG key URL"

@@ -6,21 +6,21 @@
 # =============================================================================
 set -euo pipefail
 
-SIYARIX_VERSION="1.0.1"
+SIYARIX_VERSION="1.1.0"
 DRY_RUN=0
 UNINSTALL_MODE=""
 AUTO_CONFIRM=0
 PYTHON=""
 
 banner() {
-  cat << 'EOF'
+  cat << EOF
    ███████╗██╗██╗   ██╗ █████╗ ██████╗ ██╗██╗  ██╗
    ██╔════╝██╚██╗ ██╔╝██╔══██╗██╔══██╗██║╚██╗██╔╝
    ███████╗██║╚████╔╝ ███████║██████╔╝██║ ╚███╔╝
    ╚════██║██║ ╚██╔╝  ██╔══██║██╔══██╗██║ ██╔██╗
    ███████║██║  ██║   ██║  ██║██║  ██║██║██╔╝ ██╗
    ╚══════╝╚═╝  ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝
-   AI Cybersecurity Orchestration Agent Uninstaller
+   AI Cybersecurity Orchestration Agent Uninstaller v${SIYARIX_VERSION}
 EOF
 }
 
@@ -65,7 +65,7 @@ remove_siyarix_from_profile() {
     info "Cleaning up shell profile: $file"
     local tmp
     tmp=$(mktemp)
-    
+
     # Filter out:
     # 1. Siyarix PATH section (header comment + next export line)
     # 2. Siyarix alias section (header comment + next alias line)
@@ -78,7 +78,7 @@ remove_siyarix_from_profile() {
     /alias siyarix=/ { next }
     { print }
     ' "$file" > "$tmp"
-    
+
     mv "$tmp" "$file"
     ok "Shell profile $file cleaned."
   fi
@@ -92,7 +92,7 @@ clean_system_log() {
       info "[DRY-RUN] Would purge Siyarix references from log: $log_file"
       return 0
     fi
-    
+
     if [ -w "$log_file" ]; then
       info "Purging Siyarix log lines from $log_file"
       local tmp
@@ -121,7 +121,7 @@ clean_history_file() {
       info "[DRY-RUN] Would purge Siyarix commands from history: $hist_file"
       return 0
     fi
-    
+
     info "Purging Siyarix commands from history: $hist_file"
     local tmp
     tmp=$(mktemp)
@@ -485,7 +485,7 @@ main() {
       echo "  1) Regular [Normal package uninstall]"
       echo "  2) Deep Dive [Forensic cleanup: Purge configs, models, caches, logs, keyring, history]"
       echo -n "Select option (1 or 2): "
-      
+
       local choice=""
       read -r choice
       if [ "$choice" = "2" ]; then

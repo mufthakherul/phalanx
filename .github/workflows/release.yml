@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Version number (e.g., 1.0.1)
+        description: Version number (e.g., 1.1.0)
         required: true
         type: string
       publish_pypi:
@@ -476,5 +476,5 @@ jobs:
           echo '| Docker | `docker run ghcr.io/mufthakherul/siyarix:latest` |' >> $GITHUB_STEP_SUMMARY
           echo '| Windows (winget) | `winget install Mufthakherul.Siyarix` |' >> $GITHUB_STEP_SUMMARY
           echo '| Windows (choco) | `choco install siyarix` |' >> $GITHUB_STEP_SUMMARY
-          echo '| Universal (curl) | `curl -fsSL https://siyarix.github.io/install.sh | bash` |' >> $GITHUB_STEP_SUMMARY
-          echo '| Universal (pwsh) | `irm https://siyarix.github.io/install.ps1 | iex` |' >> $GITHUB_STEP_SUMMARY
+          echo '| Universal (curl) | `curl -fsSL https://siyarix.github.io/installer/install.sh | bash` |' >> $GITHUB_STEP_SUMMARY
+          echo '| Universal (pwsh) | `irm https://siyarix.github.io/installer/install.ps1 | iex` |' >> $GITHUB_STEP_SUMMARY

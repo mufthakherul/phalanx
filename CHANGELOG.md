@@ -2,23 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.1] - 2026-07-01
+## [Unreleased]
 
-### Miscellaneous Tasks
+### Release
 
-- Sync all version references to 1.0.1
-- *(release)* Update changelog for v1.0.1
-- *(release)* Update changelog for v1.0.1
-- *(release)* Update changelog for v1.0.1
-- *(release)* Update changelog for v1.0.1
+- Prepare release metadata and automation for v1.1.0.
 
-### Ci
+## [1.1.0] - 2026-07-10
 
-- Fix setup-nuget, git-cliff install, winget publish error, labeler v5 syntax, and lychee argument error
-- Run publish-chocolatey on windows-latest for native NuGet support
-- Set default bash shell for publish-chocolatey job on Windows
-- Update nuspec schema version to 2010/07 for compatibility with NuGet 7.x
-- Use choco CLI for Chocolatey package packaging and publishing on Windows
+### Release
+
+- Bump project, installer, uninstaller, packaging, and distribution version tags to v1.1.0.
+- Add `release_notes/RELEASE_NOTES_v1.1.0.md`.
+- Update installer one-liner paths and improve uninstall banner version visibility.
+- Harden docs GitHub Pages deploy conditions and expand workflow version consistency checks.
+- Fix spellcheck workflow failure by replacing a flagged typo in the changelog.
 
 ## [1.0.1] - 2026-07-01
 
@@ -308,7 +306,7 @@ All notable changes to this project will be documented in this file.
 - Address three minor bugs across health, notifications, and parsers
 - Pin all dependencies in workflows and Dockerfile for Scorecard PinnedDependencies
 - Revert apt version pins in Dockerfile (inaccurate, broke build), keep pip pins and FROM digest pins
-- Correct pip version pins in Dockerfile (sqlmap 1.8.14 DNE, semgrep/bandit outdated)
+- Correct pip version pins in Dockerfile (sqlmap 1.8.14 unavailable, semgrep/bandit outdated)
 - *(cli)* Resolve default startup mode from SettingsStore instead of hardcoding
 - *(repl)* Respect user mode preference in /reset command and remove redundant assignment
 - *(onboarding)* Resolve static typing and mypy errors in onboarding wizard
@@ -1419,5 +1417,4 @@ All notable changes to this project will be documented in this file.
 ### Security
 
 - Upgrade download-artifact action to v4.1.3
-
 
