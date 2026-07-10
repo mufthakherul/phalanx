@@ -1,4 +1,4 @@
-name: Flaky Test Detection
+name: "GitHub Actions - Flaky Test Detection"
 
 on:
   schedule:

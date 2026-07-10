@@ -1,4 +1,4 @@
-name: Update License Year
+name: "GitHub Actions - Update License Year"
 
 on:
   schedule:

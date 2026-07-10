@@ -1,4 +1,4 @@
-name: Coverage
+name: "GitHub Actions - Coverage"
 
 on:
   push:

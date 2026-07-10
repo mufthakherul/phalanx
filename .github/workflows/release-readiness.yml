@@ -1,4 +1,4 @@
-name: Release Readiness
+name: "GitHub Actions - Release Readiness"
 
 on:
   pull_request:

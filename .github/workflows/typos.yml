@@ -1,4 +1,4 @@
-name: Spellcheck
+name: "GitHub Actions - Spellcheck"
 
 on:
   push:

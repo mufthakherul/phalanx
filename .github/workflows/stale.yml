@@ -1,4 +1,4 @@
-name: Stale Issues & PRs
+name: "GitHub Actions - Stale Issues & PRs"
 
 on:
   schedule:

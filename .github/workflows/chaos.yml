@@ -1,4 +1,4 @@
-name: Chaos & Resilience
+name: "GitHub Actions - Chaos & Resilience"
 
 on:
   schedule:

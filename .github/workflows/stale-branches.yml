@@ -1,4 +1,4 @@
-name: "Delete Stale Branches"
+name: "GitHub Actions - Delete Stale Branches"
 on:
   schedule:
     - cron: '0 0 * * 0' # Every Sunday

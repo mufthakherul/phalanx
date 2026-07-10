@@ -1,4 +1,4 @@
-name: "Artifact Attestations"
+name: "GitHub Actions - Artifact Attestations"
 permissions: read-all
 on:
   release:

@@ -1,4 +1,4 @@
-name: Auto Merge
+name: "GitHub Actions - Auto Merge"
 
 on:
   pull_request:

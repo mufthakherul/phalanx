@@ -1,4 +1,4 @@
-name: Future Compatibility
+name: "GitHub Actions - Future Compatibility"
 
 on:
   schedule:

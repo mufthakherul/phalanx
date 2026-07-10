@@ -1,4 +1,4 @@
-name: "License Compliance"
+name: "GitHub Actions - License Compliance"
 on:
   pull_request:
 permissions: read-all

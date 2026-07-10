@@ -1,4 +1,4 @@
-name: Package Size History
+name: "GitHub Actions - Package Size History"
 
 on:
   push:

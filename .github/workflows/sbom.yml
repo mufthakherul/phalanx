@@ -1,4 +1,4 @@
-name: Generate SBOM
+name: "GitHub Actions - Generate SBOM"
 
 on:
   release:

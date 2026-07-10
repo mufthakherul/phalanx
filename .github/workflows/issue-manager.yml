@@ -1,4 +1,4 @@
-name: Issue & PR Manager
+name: "GitHub Actions - Issue & PR Manager"
 on:
   issues:
     types: [opened]

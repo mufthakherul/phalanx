@@ -1,4 +1,4 @@
-name: Fuzzing
+name: "GitHub Actions - Fuzzing"
 
 on:
   schedule:
