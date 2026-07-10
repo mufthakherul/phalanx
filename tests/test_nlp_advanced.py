@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # SPDX-License-Identifier: AGPL-3.0-or-later
-from siyarix.nlp_engine import NaturalLanguageParser, ParsedIntent
+from siyarix.nlp_engine import NaturalLanguageParser
 
 
 def test_phrase_synonyms():
@@ -67,9 +67,7 @@ def test_positional_boost():
     nlp = NaturalLanguageParser()
     # Check if the score of front-loaded intent tokens gets the 1.25x boost.
     # Train nlp with a tool
-    nlp.train_tools([
-        {"name": "nmap", "description": "scanner tool", "tags": [], "category": ""}
-    ])
+    nlp.train_tools([{"name": "nmap", "description": "scanner tool", "tags": [], "category": ""}])
     # The term 'scanner' is in description. If it's early versus late, it should affect score
     # (actually BM25 score will be higher if the token is matched and gets boosted)
     # Let's verify score_intent executes successfully

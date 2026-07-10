@@ -10,7 +10,6 @@ from __future__ import annotations
 import re
 import math
 import difflib
-import functools
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any
@@ -129,7 +128,20 @@ class NaturalLanguageParser:
     }
 
     # Suffixes for lightweight stemming - ordered longest to shortest to prevent over-stemming
-    SUFFIXES = ["ation", "tion", "ness", "ment", "able", "ible", "ity", "ing", "ly", "ed", "es", "s"]
+    SUFFIXES = [
+        "ation",
+        "tion",
+        "ness",
+        "ment",
+        "able",
+        "ible",
+        "ity",
+        "ing",
+        "ly",
+        "ed",
+        "es",
+        "s",
+    ]
 
     # PHRASE_SYNONYMS applied before tokenization
     PHRASE_SYNONYMS: dict[str, str] = {
@@ -1075,9 +1087,7 @@ class NaturalLanguageParser:
             params["exclude"] = exclude_match.group(1)
 
         # Time range
-        time_range_match = re.search(
-            r"\blast\s+(\d+)\s*(day|hour|week|month)s?\b", text_lower
-        )
+        time_range_match = re.search(r"\blast\s+(\d+)\s*(day|hour|week|month)s?\b", text_lower)
         if time_range_match:
             n, unit = time_range_match.group(1), time_range_match.group(2)
             unit_map = {"hour": "h", "day": "d", "week": "w", "month": "m"}
@@ -1103,7 +1113,9 @@ class NaturalLanguageParser:
             params["cookie"] = cookie_match.group(1)
 
         # Verbosity level
-        verbosity_match = re.search(r"\b(?:verbose|verbosity|level)\s+(low|medium|high|debug|\d)\b", text_lower)
+        verbosity_match = re.search(
+            r"\b(?:verbose|verbosity|level)\s+(low|medium|high|debug|\d)\b", text_lower
+        )
         if verbosity_match:
             params["verbosity"] = verbosity_match.group(1)
 
